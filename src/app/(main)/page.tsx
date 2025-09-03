@@ -21,7 +21,7 @@ export default function HomePage() {
           dotSize={6}
           gap={15}
           baseColor="rgba(64, 63, 68, 0.40)"
-          activeColor="#5227FF"
+          activeColor="#1919ff"
           proximity={100}
           speedTrigger={50}
           shockRadius={250}
