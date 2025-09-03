@@ -18,11 +18,11 @@ export default function HomePage() {
         pointerEvents: 'none'
       }}>
         <DotGrid
-          dotSize={6}
+          dotSize={7}
           gap={15}
           baseColor="rgba(64, 63, 68, 0.40)"
           activeColor="#1919ff"
-          proximity={100}
+          proximity={150}
           speedTrigger={50}
           shockRadius={250}
           shockStrength={5}
