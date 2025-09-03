@@ -8,7 +8,7 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
   return (
     <Link href={`/ctfs/${ctf.slug}`} className="group block">
       <Card 
-        className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-1 animate-fade-in-up"
+        className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-2 animate-fade-in-up"
         style={{ animationDelay: `${animationDelay}s` }}
       >
         <div className="relative h-48 w-full overflow-hidden">
@@ -16,9 +16,10 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
             src={ctf.bannerUrl}
             alt={`${ctf.name} banner`}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
             data-ai-hint="cybersecurity abstract"
           />
+           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
         </div>
         <CardHeader>
           <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">{ctf.name}</CardTitle>
