@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
 import { InertiaPlugin } from 'gsap/InertiaPlugin';
+import { cn } from '@/lib/utils';
 
 gsap.registerPlugin(InertiaPlugin);
 
@@ -40,21 +41,25 @@ export interface DotGridProps {
   style?: React.CSSProperties;
 }
 
-function hexToRgb(hex: string) {
-  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-  if (!m) return { r: 0, g: 0, b: 0 };
-  return {
-    r: parseInt(m[1], 16),
-    g: parseInt(m[2], 16),
-    b: parseInt(m[3], 16)
+function hlsToRgb(h: number, s: number, l: number) {
+  s /= 100;
+  l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) =>
+    l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return { 
+    r: Math.round(255 * f(0)), 
+    g: Math.round(255 * f(8)), 
+    b: Math.round(255 * f(4)) 
   };
 }
 
 const DotGrid: React.FC<DotGridProps> = ({
   dotSize = 16,
   gap = 32,
-  baseColor = '#5227FF',
-  activeColor = '#5227FF',
+  baseColor = 'hsl(184 100% 50%)',
+  activeColor = 'hsl(184 100% 50%)',
   proximity = 150,
   speedTrigger = 100,
   shockRadius = 250,
@@ -79,8 +84,20 @@ const DotGrid: React.FC<DotGridProps> = ({
     lastY: 0
   });
 
-  const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
-  const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
+  const parseHsl = (hsl: string) => {
+    const [h, s, l] = hsl.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    return { h, s, l };
+  }
+
+  const baseRgb = useMemo(() => {
+    const { h, s, l } = parseHsl(baseColor);
+    return hlsToRgb(h, s, l);
+  }, [baseColor]);
+  
+  const activeRgb = useMemo(() => {
+      const { h, s, l } = parseHsl(activeColor);
+      return hlsToRgb(h, s, l);
+  }, [activeColor]);
 
   const circlePath = useMemo(() => {
     if (typeof window === 'undefined' || !window.Path2D) return null;
@@ -140,7 +157,8 @@ const DotGrid: React.FC<DotGridProps> = ({
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const dpr = window.devicePixelRatio || 1;
+      ctx.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr);
 
       const { x: px, y: py } = pointerRef.current;
 
@@ -151,19 +169,19 @@ const DotGrid: React.FC<DotGridProps> = ({
         const dy = dot.cy - py;
         const dsq = dx * dx + dy * dy;
 
-        let style = baseColor;
+        let dotStyle = `rgb(${baseRgb.r},${baseRgb.g},${baseRgb.b})`;
         if (dsq <= proxSq) {
           const dist = Math.sqrt(dsq);
           const t = 1 - dist / proximity;
           const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
           const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
           const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-          style = `rgb(${r},${g},${b})`;
+          dotStyle = `rgb(${r},${g},${b})`;
         }
 
         ctx.save();
         ctx.translate(ox, oy);
-        ctx.fillStyle = style;
+        ctx.fillStyle = dotStyle;
         ctx.fill(circlePath);
         ctx.restore();
       }
@@ -173,7 +191,7 @@ const DotGrid: React.FC<DotGridProps> = ({
 
     draw();
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+  }, [proximity, baseColor, activeColor, baseRgb, activeRgb, circlePath]);
 
   useEffect(() => {
     buildGrid();
@@ -279,11 +297,9 @@ const DotGrid: React.FC<DotGridProps> = ({
   }, [maxSpeed, speedTrigger, proximity, resistance, returnDuration, shockRadius, shockStrength]);
 
   return (
-    <section className={`p-4 flex items-center justify-center h-full w-full relative ${className}`} style={style}>
-      <div ref={wrapperRef} className="w-full h-full relative">
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-      </div>
-    </section>
+    <div ref={wrapperRef} className={cn("w-full h-full relative", className)} style={style}>
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+    </div>
   );
 };
 
