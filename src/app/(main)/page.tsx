@@ -7,20 +7,21 @@ import DotGrid from '@/components/dot-grid';
 export default function HomePage() {
   return (
     <div>
-      <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center text-center overflow-hidden bg-background">
-        <DotGrid
-            dotSize={2}
-            gap={25}
-            baseColor="hsl(var(--primary))"
-            activeColor="hsl(var(--primary))"
-            proximity={100}
-            shockRadius={200}
-            shockStrength={0.5}
-            resistance={500}
-            returnDuration={0.5}
-            className="absolute inset-0 -z-10"
+      <section className="relative h-[60vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden bg-background">
+        <div style={{ width: '100%', height: '600px', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
+          <DotGrid
+            dotSize={10}
+            gap={15}
+            baseColor="#5227FF"
+            activeColor="#5227FF"
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
           />
-        <div className="container mx-auto px-4 relative">
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code">
             r00t<span className="text-primary glow">_</span>R3b3lz
           </h1>
