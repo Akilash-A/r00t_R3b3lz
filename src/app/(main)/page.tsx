@@ -10,13 +10,15 @@ export default function HomePage() {
       <section className="relative h-[60vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden bg-background">
         <div style={{ width: '100%', height: '600px', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
           <DotGrid
-            dotSize={4}
-            gap={20}
-            baseColor="rgba(82, 39, 255, 0.3)"
+            dotSize={5}
+            gap={15}
+            baseColor="rgba(82, 39, 255, 0.2)"
             activeColor="#5227FF"
-            proximity={80}
-            shockRadius={150}
-            shockStrength={3}
+            proximity={120}
+            speedTrigger={100}
+            shockRadius={250}
+            shockStrength={5}
+            maxSpeed={5000}
             resistance={750}
             returnDuration={1.5}
           />
