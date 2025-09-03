@@ -6,7 +6,7 @@ import DotGrid from '@/components/dot-grid';
 
 export default function HomePage() {
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: '#160e26' }}>
+    <div className="relative min-h-screen" style={{ backgroundColor: '#0a0614' }}>
       {/* Full screen DotGrid background */}
       <div style={{ 
         position: 'fixed', 

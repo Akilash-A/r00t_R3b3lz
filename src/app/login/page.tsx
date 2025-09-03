@@ -26,7 +26,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
       <DotGrid
-        dotSize={10}
+        dotSize={5}
         gap={15}
         baseColor="#5227FF"
         activeColor="#5227FF"
