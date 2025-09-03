@@ -9,7 +9,7 @@ export function Header() {
           className="flex items-center justify-between w-full max-w-4xl px-8 py-5 bg-black/5 backdrop-blur-2xl rounded-full border"
           style={{ borderColor: 'rgb(54, 63, 81)' }}
         >
-          <Link href="/" className="flex items-center gap-2 group" prefetch={false}>
+          <Link href="/" className="flex items-center gap-2 group" prefetch={true}>
             <Terminal className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-12" />
             <span className="text-lg font-bold font-code text-white">
               r00t<span className="text-primary group-hover:glow transition-shadow duration-300">_</span>R3b3lz
@@ -19,24 +19,21 @@ export function Header() {
           <nav className="flex items-center gap-8 text-sm font-medium">
             <Link
               href="/"
-              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
-              style={{ borderRadius: '20px' }}
+              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
               Home
             </Link>
             <Link
               href="/members"
-              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
-              style={{ borderRadius: '20px' }}
+              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
               Members
             </Link>
             <Link
               href="/login"
-              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
-              style={{ borderRadius: '20px' }}
+              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
               Login

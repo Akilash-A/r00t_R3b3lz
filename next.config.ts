@@ -8,7 +8,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Performance optimizations
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
   images: {
+    formats: ['image/webp', 'image/avif'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -23,6 +28,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  // Optimize builds
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-avatar'],
   },
 };
 
