@@ -41,25 +41,21 @@ export interface DotGridProps {
   style?: React.CSSProperties;
 }
 
-function hlsToRgb(h: number, s: number, l: number) {
-  s /= 100;
-  l /= 100;
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) =>
-    l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
-  return { 
-    r: Math.round(255 * f(0)), 
-    g: Math.round(255 * f(8)), 
-    b: Math.round(255 * f(4)) 
+function hexToRgb(hex: string) {
+  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+  if (!m) return { r: 0, g: 0, b: 0 };
+  return {
+    r: parseInt(m[1], 16),
+    g: parseInt(m[2], 16),
+    b: parseInt(m[3], 16)
   };
 }
 
 const DotGrid: React.FC<DotGridProps> = ({
   dotSize = 16,
   gap = 32,
-  baseColor = 'hsl(184 100% 50%)',
-  activeColor = 'hsl(184 100% 50%)',
+  baseColor = '#00EEFF',
+  activeColor = '#00EEFF',
   proximity = 150,
   speedTrigger = 100,
   shockRadius = 250,
@@ -84,20 +80,8 @@ const DotGrid: React.FC<DotGridProps> = ({
     lastY: 0
   });
 
-  const parseHsl = (hsl: string) => {
-    const [h, s, l] = hsl.match(/\d+/g)?.map(Number) || [0, 0, 0];
-    return { h, s, l };
-  }
-
-  const baseRgb = useMemo(() => {
-    const { h, s, l } = parseHsl(baseColor);
-    return hlsToRgb(h, s, l);
-  }, [baseColor]);
-  
-  const activeRgb = useMemo(() => {
-      const { h, s, l } = parseHsl(activeColor);
-      return hlsToRgb(h, s, l);
-  }, [activeColor]);
+  const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
+  const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
 
   const circlePath = useMemo(() => {
     if (typeof window === 'undefined' || !window.Path2D) return null;
@@ -157,11 +141,7 @@ const DotGrid: React.FC<DotGridProps> = ({
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      
-      const dpr = window.devicePixelRatio || 1;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save();
-      ctx.scale(dpr, dpr);
 
       const { x: px, y: py } = pointerRef.current;
 
@@ -172,7 +152,7 @@ const DotGrid: React.FC<DotGridProps> = ({
         const dy = dot.cy - py;
         const dsq = dx * dx + dy * dy;
 
-        let dotStyle = `rgb(${baseRgb.r},${baseRgb.g},${baseRgb.b})`;
+        let dotStyle = baseColor;
         if (dsq <= proxSq) {
           const dist = Math.sqrt(dsq);
           const t = 1 - dist / proximity;
@@ -188,27 +168,31 @@ const DotGrid: React.FC<DotGridProps> = ({
         ctx.fill(circlePath);
         ctx.restore();
       }
-      ctx.restore();
 
       rafId = requestAnimationFrame(draw);
     };
 
     draw();
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeColor, baseRgb, activeRgb, circlePath]);
+  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
 
   useEffect(() => {
     buildGrid();
     let ro: ResizeObserver | null = null;
     if ('ResizeObserver' in window) {
       ro = new ResizeObserver(buildGrid);
-      wrapperRef.current && ro.observe(wrapperRef.current);
+      if (wrapperRef.current) {
+        ro.observe(wrapperRef.current);
+      }
     } else {
-      (window as Window).addEventListener('resize', buildGrid);
+      window.addEventListener('resize', buildGrid);
     }
     return () => {
-      if (ro) ro.disconnect();
-      else window.removeEventListener('resize', buildGrid);
+      if (ro) {
+        ro.disconnect();
+      } else {
+        window.removeEventListener('resize', buildGrid);
+      }
     };
   }, [buildGrid]);
 
@@ -235,9 +219,11 @@ const DotGrid: React.FC<DotGridProps> = ({
       pr.vy = vy;
       pr.speed = speed;
 
-      const rect = canvasRef.current!.getBoundingClientRect();
-      pr.x = e.clientX - rect.left;
-      pr.y = e.clientY - rect.top;
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        pr.x = e.clientX - rect.left;
+        pr.y = e.clientY - rect.top;
+      }
 
       for (const dot of dotsRef.current) {
         const dist = Math.hypot(dot.cx - pr.x, dot.cy - pr.y);
@@ -263,7 +249,9 @@ const DotGrid: React.FC<DotGridProps> = ({
     };
 
     const onClick = (e: MouseEvent) => {
-      const rect = canvasRef.current!.getBoundingClientRect();
+      const rect = canvasRef.current?.getBoundingClientRect();
+       if (!rect) return;
+
       const cx = e.clientX - rect.left;
       const cy = e.clientY - rect.top;
       for (const dot of dotsRef.current) {
@@ -308,3 +296,5 @@ const DotGrid: React.FC<DotGridProps> = ({
 };
 
 export default DotGrid;
+
+    
