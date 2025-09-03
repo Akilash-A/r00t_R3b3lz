@@ -8,17 +8,15 @@ export default function HomePage() {
   return (
     <div>
       <section className="relative h-[60vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden bg-background">
-        <div style={{ width: '100%', height: '600px', position: 'absolute', top: 0, left: 0, zIndex: 0 }}>
+        <div style={{ width: '100%', height: '600px', position: 'relative' }}>
           <DotGrid
-            dotSize={5}
+            dotSize={10}
             gap={15}
-            baseColor="rgba(82, 39, 255, 0.2)"
+            baseColor="#5227FF"
             activeColor="#5227FF"
             proximity={120}
-            speedTrigger={100}
             shockRadius={250}
             shockStrength={5}
-            maxSpeed={5000}
             resistance={750}
             returnDuration={1.5}
           />
