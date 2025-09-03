@@ -3,13 +3,38 @@ import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
+const AnimatedHeroBackground = () => (
+  <>
+    <div className="absolute inset-0 h-full w-full bg-background bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="absolute inset-0 h-full w-full bg-background [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
+    <svg
+      viewBox="0 0 1024 1024"
+      className="absolute top-1/2 left-1/2 -z-10 h-[64rem] w-[64rem] -translate-x-1/2 -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)]"
+      aria-hidden="true"
+    >
+      <circle
+        cx={512}
+        cy={512}
+        r={512}
+        fill="url(#gradient)"
+        fillOpacity="0.7"
+      />
+      <defs>
+        <radialGradient id="gradient">
+          <stop stopColor="hsl(var(--primary))" />
+          <stop offset={1} stopColor="hsl(var(--primary) / 0.5)" />
+        </radialGradient>
+      </defs>
+    </svg>
+  </>
+);
+
+
 export default function HomePage() {
   return (
     <div>
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center text-center text-white overflow-hidden bg-background">
-        <div className="absolute inset-0 h-full w-full bg-background bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="absolute inset-0 h-full w-full bg-background [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
-        <div className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 bg-primary/20 blur-3xl rounded-full animate-pulse-slow"></div>
+        <AnimatedHeroBackground />
         <div className="container mx-auto px-4 relative">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code">
             r00t<span className="text-primary glow">_</span>R3b3lz
