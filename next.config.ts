@@ -24,10 +24,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Disable build activity indicator to reduce noise
-  devIndicators: {
-    buildActivity: false,
-  },
 };
 
 export default nextConfig;
