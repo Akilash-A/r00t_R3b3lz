@@ -4,10 +4,13 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
 
-export function CtfCard({ ctf }: { ctf: Ctf }) {
+export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?: number }) {
   return (
     <Link href={`/ctfs/${ctf.slug}`} className="group block">
-      <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50">
+      <Card 
+        className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-1 animate-fade-in-up"
+        style={{ animationDelay: `${animationDelay}s` }}
+      >
         <div className="relative h-48 w-full overflow-hidden">
           <Image
             src={ctf.bannerUrl}
