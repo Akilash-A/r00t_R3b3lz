@@ -12,7 +12,8 @@ export async function authenticate(_prevState: string | undefined, formData: For
   const password = formData.get('password');
 
   if (username === USERNAME && password === PASSWORD) {
-    cookies().set(COOKIE_NAME, 'true', { httpOnly: true, path: '/', maxAge: 60 * 60 * 24 });
+    const cookieStore = await cookies();
+    cookieStore.set(COOKIE_NAME, 'true', { httpOnly: true, path: '/', maxAge: 60 * 60 * 24 });
     redirect('/admin-page');
   }
 
@@ -20,7 +21,8 @@ export async function authenticate(_prevState: string | undefined, formData: For
 }
 
 export async function logout() {
-  cookies().delete(COOKIE_NAME);
+  const cookieStore = await cookies();
+  cookieStore.delete(COOKIE_NAME);
   redirect('/login');
 }
 

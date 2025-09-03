@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const cookie = request.cookies.get('r00t-r3b3lz-auth');
   const { pathname } = request.nextUrl;
 
