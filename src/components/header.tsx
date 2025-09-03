@@ -21,6 +21,7 @@ export function Header() {
               href="/"
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
               style={{ borderRadius: '20px' }}
+              prefetch={true}
             >
               Home
             </Link>
@@ -28,6 +29,7 @@ export function Header() {
               href="/members"
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
               style={{ borderRadius: '20px' }}
+              prefetch={true}
             >
               Members
             </Link>
@@ -35,6 +37,7 @@ export function Header() {
               href="/login"
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
               style={{ borderRadius: '20px' }}
+              prefetch={true}
             >
               Login
             </Link>
