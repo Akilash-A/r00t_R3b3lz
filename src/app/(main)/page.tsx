@@ -2,13 +2,24 @@
 import { ctfs } from '@/lib/data';
 import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
-import { Particles } from '@/components/particles';
+import DotGrid from '@/components/dot-grid';
 
 export default function HomePage() {
   return (
     <div>
       <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center text-center overflow-hidden bg-background">
-        <Particles className="absolute inset-0" />
+        <DotGrid
+            dotSize={2}
+            gap={25}
+            baseColor="hsl(var(--primary))"
+            activeColor="hsl(var(--primary))"
+            proximity={100}
+            shockRadius={200}
+            shockStrength={0.5}
+            resistance={500}
+            returnDuration={0.5}
+            className="absolute inset-0 -z-10"
+          />
         <div className="container mx-auto px-4 relative">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code">
             r00t<span className="text-primary glow">_</span>R3b3lz
