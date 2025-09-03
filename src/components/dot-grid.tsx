@@ -157,8 +157,11 @@ const DotGrid: React.FC<DotGridProps> = ({
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      
       const dpr = window.devicePixelRatio || 1;
-      ctx.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.save();
+      ctx.scale(dpr, dpr);
 
       const { x: px, y: py } = pointerRef.current;
 
@@ -185,6 +188,7 @@ const DotGrid: React.FC<DotGridProps> = ({
         ctx.fill(circlePath);
         ctx.restore();
       }
+      ctx.restore();
 
       rafId = requestAnimationFrame(draw);
     };
