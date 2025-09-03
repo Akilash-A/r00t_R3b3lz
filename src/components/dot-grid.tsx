@@ -152,7 +152,9 @@ const DotGrid: React.FC<DotGridProps> = ({
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const dpr = window.devicePixelRatio || 1;
+      ctx.clearRect(0, 0, canvas.width * dpr, canvas.height * dpr);
 
       const { x: px, y: py } = pointerRef.current;
 
@@ -185,7 +187,7 @@ const DotGrid: React.FC<DotGridProps> = ({
 
     draw();
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+  }, [proximity, baseColor, activeColor, baseRgb, activeRgb, circlePath]);
 
   useEffect(() => {
     buildGrid();
@@ -199,8 +201,8 @@ const DotGrid: React.FC<DotGridProps> = ({
       window.addEventListener('resize', buildGrid);
     }
     return () => {
-      if (ro) {
-        ro.disconnect();
+      if (ro && wrapperRef.current) {
+        ro.unobserve(wrapperRef.current);
       } else {
         window.removeEventListener('resize', buildGrid);
       }
