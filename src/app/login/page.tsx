@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Terminal, LogIn, AlertCircle } from 'lucide-react';
+import DotGrid from '@/components/dot-grid';
 
 function LoginButton() {
   const { pending } = useFormStatus();
@@ -23,7 +24,19 @@ export default function LoginPage() {
   const [errorMessage, dispatch] = useFormState(authenticate, undefined);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+      <DotGrid
+        dotSize={10}
+        gap={15}
+        baseColor="#5227FF"
+        activeColor="#5227FF"
+        proximity={120}
+        shockRadius={250}
+        shockStrength={5}
+        resistance={750}
+        returnDuration={1.5}
+        className="-z-10"
+      />
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
           <Terminal className="h-10 w-10 text-primary" />
