@@ -12,7 +12,7 @@ export default function HomePage() {
           <DotGrid
             dotSize={10}
             gap={15}
-            baseColor="#5227FF"
+            baseColor="rgba(82, 39, 255, 0.1)"
             activeColor="#5227FF"
             proximity={120}
             shockRadius={250}
