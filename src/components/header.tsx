@@ -5,7 +5,10 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6">
       <div className="flex justify-center">
-        <div className="flex items-center justify-between w-full max-w-4xl px-8 py-5 bg-black/10 backdrop-blur-xl rounded-full border border-white">
+        <div 
+          className="flex items-center justify-between w-full max-w-4xl px-8 py-5 bg-black/5 backdrop-blur-2xl rounded-full border"
+          style={{ borderColor: 'rgb(54, 63, 81)' }}
+        >
           <Link href="/" className="flex items-center gap-2 group" prefetch={false}>
             <Terminal className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-12" />
             <span className="text-lg font-bold font-code text-white">
