@@ -1,6 +1,12 @@
 import { teamMembers } from '@/lib/data';
 import { MemberCard } from '@/components/member-card';
 
+// Add metadata for better SEO and performance
+export const metadata = {
+  title: 'Team Members - r00t_R3b3lz',
+  description: 'Meet our CTF team members',
+};
+
 export default function MembersPage() {
   return (
     <div className="container mx-auto py-16 md:py-24 px-4 pt-32">

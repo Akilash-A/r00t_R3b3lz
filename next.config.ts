@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
@@ -29,9 +28,23 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Optimize builds
+  // Optimize builds 
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-avatar'],
+  },
+  // Add headers to handle CORS issues
+  async headers() {
+    return [
+      {
+        source: '/_next/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+    ];
   },
 };
 

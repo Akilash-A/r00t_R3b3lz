@@ -2,7 +2,24 @@
 import { ctfs } from '@/lib/data';
 import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
-import DotGrid from '@/components/dot-grid';
+import dynamic from 'next/dynamic';
+
+// Dynamically import DotGrid only for homepage to improve initial load
+const DotGrid = dynamic(() => import('@/components/dot-grid'), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 opacity-30">
+      <div 
+        className="w-full h-full"
+        style={{
+          backgroundImage: `radial-gradient(circle, rgba(64, 63, 68, 0.40) 1px, transparent 1px)`,
+          backgroundSize: '20px 20px',
+          backgroundPosition: '0 0',
+        }}
+      />
+    </div>
+  )
+});
 
 export default function HomePage() {
   return (
