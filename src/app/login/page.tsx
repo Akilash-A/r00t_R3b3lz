@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { authenticate } from '@/lib/actions';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -8,23 +9,32 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Terminal, LogIn, AlertCircle } from 'lucide-react';
-import DotGrid from '@/components/dot-grid';
+
+// Dynamically import DotGrid to prevent SSR issues
+const DotGrid = dynamic(() => import('@/components/dot-grid'), {
+  ssr: false,
+  loading: () => null
+});
 
 function LoginButton() {
-  const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" aria-disabled={pending}>
+    <Button type="submit" className="w-full">
       <LogIn className="mr-2 h-4 w-4" />
-      {pending ? 'Logging in...' : 'Login'}
+      Login
     </Button>
   );
 }
 
 export default function LoginPage() {
-  const [errorMessage, dispatch] = useFormState(authenticate, undefined);
+  const [errorMessage, dispatch] = useActionState(authenticate, undefined);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4" suppressHydrationWarning>
       <DotGrid
         dotSize={5}
         gap={15}
@@ -35,14 +45,14 @@ export default function LoginPage() {
         shockStrength={5}
         resistance={750}
         returnDuration={1.5}
-        className="-z-10"
+        className="absolute inset-0"
       />
-      <div className="w-full max-w-sm">
+      <div className="relative z-10 w-full max-w-sm" suppressHydrationWarning>
         <div className="flex flex-col items-center mb-6">
-          <Terminal className="h-10 w-10 text-primary" />
-          <h1 className="text-2xl font-bold mt-2 font-code">r00t_R3b3lz Admin</h1>
+          <Terminal className="h-10 w-10 text-primary" suppressHydrationWarning />
+          <h1 className="text-2xl font-bold mt-2 font-code" suppressHydrationWarning>r00t_R3b3lz Admin</h1>
         </div>
-        <Card>
+        <Card suppressHydrationWarning>
           <CardHeader>
             <CardTitle>Admin Access</CardTitle>
             <CardDescription>Enter your credentials to manage content.</CardDescription>
@@ -55,8 +65,9 @@ export default function LoginPage() {
                   id="username"
                   name="username"
                   type="text"
-                  placeholder="T3chC0brA"
+                  placeholder="Enter your username"
                   required
+                  suppressHydrationWarning
                 />
               </div>
               <div className="space-y-2">
@@ -65,7 +76,9 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  placeholder="Enter your password"
                   required
+                  suppressHydrationWarning
                 />
               </div>
               {errorMessage && (
