@@ -33,6 +33,14 @@ export function Header() {
             >
               Members
             </Link>
+            <Link
+              href="/login"
+              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10"
+              style={{ borderRadius: '20px' }}
+              prefetch={false}
+            >
+              Login
+            </Link>
           </nav>
         </div>
       </div>
