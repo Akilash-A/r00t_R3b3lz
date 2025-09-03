@@ -1,4 +1,6 @@
 
+'use client';
+
 import { ctfs } from '@/lib/data';
 import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
