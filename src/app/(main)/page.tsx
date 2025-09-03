@@ -31,36 +31,20 @@ export default function HomePage() {
         />
       </div>
       
-      <section className="relative h-[70vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden">
+      <section className="relative h-[100vh] flex items-center justify-center text-center overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
-          {/* New Background Badge */}
-          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-2 mb-8 text-sm text-white/80">
-            <div className="w-2 h-2 bg-primary rounded-full"></div>
-            New CTF Platform
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-white">
-            Organized chaos with every<br />
-            <span className="text-primary glow">cursor movement!</span>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code text-white">
+            r00t<span className="text-primary glow">_</span>R3b3lz
           </h1>
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/70 mb-8">
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/70">
             A collection of our Capture The Flag adventures and solutions. Dive into the world of hacking with us.
           </p>
-          
-          <div className="flex items-center justify-center gap-4">
-            <button className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-white/90 transition-colors">
-              Get Started
-            </button>
-            <button className="bg-white/10 text-white px-8 py-3 rounded-full font-semibold hover:bg-white/20 transition-colors border border-white/20">
-              Learn More
-            </button>
-          </div>
         </div>
       </section>
 
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-24 relative z-10">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2">
+          <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2 text-white">
             <Sparkles className="text-primary" />
             CTF Write-ups
           </h2>
