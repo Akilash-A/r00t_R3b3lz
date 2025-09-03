@@ -1,3 +1,4 @@
+
 import type { Ctf } from '@/lib/definitions';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,7 +9,7 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
   return (
     <Link href={`/ctfs/${ctf.slug}`} className="group block">
       <Card 
-        className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-2 animate-fade-in-up"
+        className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-2 animate-fade-in-up bg-card/80 backdrop-blur-sm"
         style={{ animationDelay: `${animationDelay}s` }}
       >
         <div className="relative h-48 w-full overflow-hidden">
