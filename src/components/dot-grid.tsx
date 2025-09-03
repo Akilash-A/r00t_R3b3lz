@@ -42,6 +42,17 @@ export interface DotGridProps {
 }
 
 function hexToRgb(hex: string) {
+  if (hex.startsWith('hsl')) {
+    const hslValues = hex.match(/(\d+(\.\d+)?)/g);
+    if (!hslValues || hslValues.length < 3) return { r: 0, g: 0, b: 0 };
+    let [h, s, l] = hslValues.map(Number);
+    s /= 100;
+    l /= 100;
+    const k = (n: number) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    return { r: 255 * f(0), g: 255 * f(8), b: 255 * f(4) };
+  }
   const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
   if (!m) return { r: 0, g: 0, b: 0 };
   return {
@@ -296,5 +307,3 @@ const DotGrid: React.FC<DotGridProps> = ({
 };
 
 export default DotGrid;
-
-    
