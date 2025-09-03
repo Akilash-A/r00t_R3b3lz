@@ -1,13 +1,22 @@
 import { ctfs } from '@/lib/data';
 import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 export default function HomePage() {
   return (
     <div>
-      <section className="py-20 md:py-32 bg-card border-b relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-slate-900/[0.04] bg-[bottom_1px_center] dark:bg-grid-slate-400/[0.05] dark:bg-bottom dark:border-b dark:border-slate-100/5 [mask-image:linear-gradient(to_bottom,transparent,black)]"></div>
-        <div className="container mx-auto text-center px-4 relative">
+      <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center text-center text-white overflow-hidden">
+        <Image
+          src="https://picsum.photos/1920/1080"
+          alt="Hacker desk background"
+          fill
+          className="object-cover"
+          data-ai-hint="hacker desk"
+          priority
+        />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="container mx-auto px-4 relative">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code">
             r00t<span className="text-primary glow">_</span>R3b3lz
           </h1>
