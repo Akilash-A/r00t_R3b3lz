@@ -6,22 +6,32 @@ import DotGrid from '@/components/dot-grid';
 
 export default function HomePage() {
   return (
-    <div>
-      <section className="relative h-[60vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden bg-background">
-        <div style={{ width: '100%', height: '600px', position: 'relative' }}>
-          <DotGrid
-            dotSize={10}
-            gap={15}
-            baseColor="rgba(82, 39, 255, 0.05)"
-            activeColor="#5227FF"
-            proximity={100}
-            speedTrigger={50}
-            shockRadius={250}
-            shockStrength={5}
-            resistance={750}
-            returnDuration={1.5}
-          />
-        </div>
+    <div className="relative min-h-screen" style={{ backgroundColor: '#160e26' }}>
+      {/* Full screen DotGrid background */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '100vh', 
+        zIndex: 0,
+        pointerEvents: 'none'
+      }}>
+        <DotGrid
+          dotSize={6}
+          gap={15}
+          baseColor="rgba(82, 39, 255, 0.05)"
+          activeColor="#5227FF"
+          proximity={100}
+          speedTrigger={50}
+          shockRadius={250}
+          shockStrength={5}
+          resistance={750}
+          returnDuration={1.5}
+        />
+      </div>
+      
+      <section className="relative h-[60vh] min-h-[600px] flex items-center justify-center text-center overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 font-code">
             r00t<span className="text-primary glow">_</span>R3b3lz
