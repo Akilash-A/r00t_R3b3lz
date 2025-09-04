@@ -1,6 +1,8 @@
 import type { Ctf, Challenge, TeamMember } from './definitions';
 
-export const ctfs: Ctf[] = [
+// Changed to `let` to allow for mutations in this demo application.
+// In a real application, this would be a database.
+export let ctfs: Ctf[] = [
   {
     id: '1',
     slug: 'functf-2024',
@@ -24,7 +26,7 @@ export const ctfs: Ctf[] = [
   },
 ];
 
-export const challenges: Challenge[] = [
+export let challenges: Challenge[] = [
   // FuncTF 2024 Challenges
   {
     id: '101',
@@ -102,7 +104,7 @@ Flag: \`securinets{pwn_all_the_things}\`
   },
 ];
 
-export const teamMembers: TeamMember[] = [
+export let teamMembers: TeamMember[] = [
   {
     id: '1',
     name: 'T3chC0brA',

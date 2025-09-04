@@ -1,9 +1,9 @@
+
 'use client';
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memberSchema, type MemberFormData } from "@/lib/definitions";
-import type { TeamMember } from "@/lib/definitions";
+import { memberSchema, type MemberFormData, type TeamMember } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,15 +23,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { upsertMember } from "@/lib/actions";
+import { useTransition } from "react";
 
 interface MemberFormProps {
   member?: TeamMember | null;
-  onFormSubmit: () => void;
+  onFormSubmit: (member: TeamMember) => void;
 }
 
 export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
   const { toast } = useToast();
   const isEditMode = !!member;
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
@@ -39,19 +42,27 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
       name: member?.name || "",
       handle: member?.handle || "",
       role: member?.role || "",
+      avatarUrl: member?.avatarUrl || "https://picsum.photos/200/200",
     },
   });
 
   async function onSubmit(data: MemberFormData) {
-    // In a real app, you would call a server action here.
-    // e.g., await updateMember(data) or await addMember(data)
-    console.log({ ...data, id: member?.id });
-
-    toast({
-      title: isEditMode ? "Member Updated" : "Member Added",
-      description: `${data.name} has been successfully ${isEditMode ? 'updated' : 'added'}. (Simulation)`,
+    startTransition(async () => {
+      const result = await upsertMember(data, member?.id || null);
+      if (result.success && result.data) {
+        toast({
+          title: isEditMode ? "Member Updated" : "Member Added",
+          description: `${result.data.name} has been successfully ${isEditMode ? 'updated' : 'added'}.`,
+        });
+        onFormSubmit(result.data);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
     });
-    onFormSubmit(); // This will close the dialog
   }
 
   return (
@@ -103,16 +114,29 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               </FormItem>
             )}
           />
+           <FormField
+            control={form.control}
+            name="avatarUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Avatar URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://picsum.photos/200/200" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="space-y-2">
-            <Label htmlFor="avatar">Avatar</Label>
-            <Input id="avatar" type="file" />
+            <Label htmlFor="avatar">Upload Avatar</Label>
+            <Input id="avatar" type="file" disabled />
             <p className="text-sm text-muted-foreground">
-              Image upload is for demonstration and won't be saved.
+              Image upload is for demonstration and won't be saved. Please provide a URL.
             </p>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting
+            <Button type="submit" disabled={isPending}>
+              {isPending
                 ? "Saving..."
                 : isEditMode
                 ? "Save Changes"

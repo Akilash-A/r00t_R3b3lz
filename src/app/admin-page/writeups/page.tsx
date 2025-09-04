@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useState, useMemo } from "react";
-import { challenges as initialChallenges, ctfs } from "@/lib/data";
+import React, { useState, useMemo, useTransition } from "react";
+import { challenges as initialChallenges, ctfs as initialCtfs } from "@/lib/data";
 import type { Challenge, Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,14 +22,17 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { deleteChallenge } from "@/lib/actions";
 
 const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev'];
 
 export default function AdminWriteupsPage() {
   const [challenges, setChallenges] = useState(initialChallenges);
+  const [ctfs, setCtfs] = useState(initialCtfs); // Although not mutated, good practice to have it in state
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
   const [nameFilter, setNameFilter] = useState('');
@@ -46,29 +49,44 @@ export default function AdminWriteupsPage() {
         const ctf = ctfs.find((c) => c.id === challenge.ctfId);
         return (
           challenge.title.toLowerCase().includes(nameFilter.toLowerCase()) &&
-          ctfFilter[challenge.ctfId] &&
-          categoryFilter[challenge.category]
+          (ctfFilter[challenge.ctfId] ?? true) &&
+          (categoryFilter[challenge.category] ?? true)
         );
       });
-  }, [challenges, nameFilter, ctfFilter, categoryFilter]);
+  }, [challenges, nameFilter, ctfFilter, categoryFilter, ctfs]);
 
 
-  const handleFormSubmit = () => {
-    // In a real app, re-fetch data from the server here.
+  const handleFormSubmit = (newOrUpdatedChallenge: Challenge) => {
+     if (selectedChallenge) {
+      setChallenges(challenges.map(c => c.id === newOrUpdatedChallenge.id ? newOrUpdatedChallenge : c));
+    } else {
+      setChallenges([newOrUpdatedChallenge, ...challenges]);
+    }
     setFormDialogOpen(false);
     setSelectedChallenge(null);
   };
 
   const handleDeleteConfirm = () => {
     if (!selectedChallenge) return;
-    // Client-side simulation of deletion. In a real app, call a server action.
-    setChallenges(challenges.filter((c) => c.id !== selectedChallenge.id));
-    toast({
-      title: "Write-up Deleted",
-      description: `"${selectedChallenge.title}" has been removed.`,
+    
+    startTransition(async () => {
+      const result = await deleteChallenge(selectedChallenge.id);
+      if(result.success) {
+        setChallenges(challenges.filter((c) => c.id !== selectedChallenge.id));
+        toast({
+          title: "Write-up Deleted",
+          description: `"${selectedChallenge.title}" has been removed.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      setDeleteDialogOpen(false);
+      setSelectedChallenge(null);
     });
-    setDeleteDialogOpen(false);
-    setSelectedChallenge(null);
   };
 
   const handleAddNew = () => {
@@ -113,7 +131,7 @@ export default function AdminWriteupsPage() {
               {ctfs.map((ctf) => (
                 <DropdownMenuCheckboxItem
                   key={ctf.id}
-                  checked={ctfFilter[ctf.id]}
+                  checked={ctfFilter[ctf.id] ?? true}
                   onCheckedChange={(checked) => setCtfFilter(prev => ({...prev, [ctf.id]: !!checked}))}
                 >
                   {ctf.name}
@@ -124,7 +142,7 @@ export default function AdminWriteupsPage() {
                {categories.map((cat) => (
                 <DropdownMenuCheckboxItem
                   key={cat}
-                  checked={categoryFilter[cat]}
+                  checked={categoryFilter[cat] ?? true}
                   onCheckedChange={(checked) => setCategoryFilter(prev => ({...prev, [cat]: !!checked}))}
                 >
                   {cat}
@@ -177,7 +195,10 @@ export default function AdminWriteupsPage() {
         </CardContent>
       </Card>
       
-      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+      <Dialog open={formDialogOpen} onOpenChange={(open) => {
+        if (!open) setSelectedChallenge(null);
+        setFormDialogOpen(open);
+      }}>
         <WriteupForm 
           challenge={selectedChallenge} 
           ctfs={ctfs} 
@@ -189,6 +210,7 @@ export default function AdminWriteupsPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
+        isPending={isPending}
         title="Are you sure you want to delete this write-up?"
         description="This action cannot be undone. This will permanently remove the write-up."
       />

@@ -3,8 +3,7 @@
 
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { challengeSchema, type ChallengeFormData } from "@/lib/definitions";
-import type { Challenge, Ctf } from "@/lib/definitions";
+import { challengeSchema, type ChallengeFormData, type Challenge, type Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,11 +27,13 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
+import { upsertChallenge } from "@/lib/actions";
+import { useTransition } from "react";
 
 interface WriteupFormProps {
   challenge?: Challenge | null;
   ctfs: Ctf[];
-  onFormSubmit: () => void;
+  onFormSubmit: (challenge: Challenge) => void;
 }
 
 const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev'];
@@ -50,6 +51,7 @@ function MarkdownPreview({ content }: { content: string }) {
 export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps) {
   const { toast } = useToast();
   const isEditMode = !!challenge;
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<ChallengeFormData>({
     resolver: zodResolver(challengeSchema),
@@ -59,20 +61,29 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
       category: challenge?.category || undefined,
       description: challenge?.description || "",
       writeup: challenge?.writeup || "",
+      imageUrl: challenge?.imageUrl || "",
     },
   });
 
   const writeupContent = useWatch({ control: form.control, name: 'writeup' });
 
   async function onSubmit(data: ChallengeFormData) {
-    // In a real app, you would call a server action here.
-    console.log({ ...data, id: challenge?.id });
-
-    toast({
-      title: isEditMode ? "Write-up Updated" : "Write-up Added",
-      description: `"${data.title}" has been successfully ${isEditMode ? 'updated' : 'added'}. (Simulation)`,
+     startTransition(async () => {
+      const result = await upsertChallenge(data, challenge?.id || null);
+      if (result.success && result.data) {
+        toast({
+          title: isEditMode ? "Write-up Updated" : "Write-up Added",
+          description: `"${result.data.title}" has been successfully ${isEditMode ? 'updated' : 'added'}.`,
+        });
+        onFormSubmit(result.data);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
     });
-    onFormSubmit();
   }
 
   return (
@@ -84,7 +95,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-6 flex-1">
+        <form id="writeup-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto pr-6 flex-1">
           <FormField
             control={form.control}
             name="title"
@@ -157,11 +168,27 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Challenge Image URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://example.com/image.png" {...field} />
+                </FormControl>
+                 <p className="text-sm text-muted-foreground">
+                    Provide a direct URL to an image for the challenge.
+                 </p>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="space-y-2">
-            <Label htmlFor="challenge-image">Challenge Image</Label>
-            <Input id="challenge-image" type="file" />
+            <Label htmlFor="challenge-image-upload">Upload Challenge Image</Label>
+            <Input id="challenge-image-upload" type="file" disabled />
             <p className="text-sm text-muted-foreground">
-              Image upload is for demonstration and won't be saved.
+              Image upload is for demonstration and won't be saved. Please provide a URL.
             </p>
           </div>
           <FormField
@@ -169,7 +196,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
             name="writeup"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Write-up</FormLabel>
+                <FormLabel>Write-up (Markdown)</FormLabel>
                 <Tabs defaultValue="edit" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="edit">Markdown</TabsTrigger>
@@ -190,8 +217,8 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
           />
         </form>
         <DialogFooter className="mt-4 pt-4 border-t">
-          <Button type="submit" form="writeup-form" disabled={form.formState.isSubmitting} onClick={form.handleSubmit(onSubmit)}>
-            {form.formState.isSubmitting
+          <Button type="submit" form="writeup-form" disabled={isPending}>
+            {isPending
               ? "Saving..."
               : isEditMode
               ? "Save Changes"

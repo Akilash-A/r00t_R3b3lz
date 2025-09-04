@@ -1,42 +1,59 @@
 
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import { ctfs as initialCtfs } from "@/lib/data";
 import type { Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { CtfForm } from "@/components/admin/ctf-form";
 import { DeleteConfirmationDialog } from "@/components/admin/delete-confirmation-dialog";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import { deleteCtf } from "@/lib/actions";
 
 export default function AdminCtfsPage() {
   const [ctfs, setCtfs] = useState(initialCtfs);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCtf, setSelectedCtf] = useState<Ctf | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
-  const handleFormSubmit = () => {
-    // In a real app, re-fetch data from the server here.
+  const handleFormSubmit = (newOrUpdatedCtf: Ctf) => {
+    if (selectedCtf) {
+      setCtfs(ctfs.map(c => c.id === newOrUpdatedCtf.id ? newOrUpdatedCtf : c));
+    } else {
+      setCtfs([newOrUpdatedCtf, ...ctfs]);
+    }
     setFormDialogOpen(false);
     setSelectedCtf(null);
   };
 
   const handleDeleteConfirm = () => {
     if (!selectedCtf) return;
-    // Client-side simulation of deletion. In a real app, call a server action.
-    setCtfs(ctfs.filter((c) => c.id !== selectedCtf.id));
-    toast({
-      title: "CTF Event Deleted",
-      description: `"${selectedCtf.name}" has been removed.`,
+
+    startTransition(async () => {
+      const result = await deleteCtf(selectedCtf.id);
+      if (result.success) {
+        setCtfs(ctfs.filter((c) => c.id !== selectedCtf.id));
+        toast({
+          title: "CTF Event Deleted",
+          description: `"${selectedCtf.name}" has been removed.`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      setDeleteDialogOpen(false);
+      setSelectedCtf(null);
     });
-    setDeleteDialogOpen(false);
-    setSelectedCtf(null);
   };
 
   const handleAddNew = () => {
@@ -106,7 +123,10 @@ export default function AdminCtfsPage() {
         </CardContent>
       </Card>
       
-      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+      <Dialog open={formDialogOpen} onOpenChange={(open) => {
+        if (!open) setSelectedCtf(null);
+        setFormDialogOpen(open);
+      }}>
         <CtfForm ctf={selectedCtf} onFormSubmit={handleFormSubmit} />
       </Dialog>
       
@@ -114,6 +134,7 @@ export default function AdminCtfsPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
+        isPending={isPending}
         title="Are you sure you want to delete this CTF event?"
         description="This action cannot be undone. This will permanently remove the event and may affect associated write-ups."
       />

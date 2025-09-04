@@ -3,8 +3,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ctfSchema, type CtfFormData } from "@/lib/definitions";
-import type { Ctf } from "@/lib/definitions";
+import { ctfSchema, type CtfFormData, type Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,15 +24,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { upsertCtf } from "@/lib/actions";
+import { useTransition } from "react";
 
 interface CtfFormProps {
   ctf?: Ctf | null;
-  onFormSubmit: () => void;
+  onFormSubmit: (ctf: Ctf) => void;
 }
 
 export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
   const { toast } = useToast();
   const isEditMode = !!ctf;
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<CtfFormData>({
     resolver: zodResolver(ctfSchema),
@@ -41,18 +43,27 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
       name: ctf?.name || "",
       slug: ctf?.slug || "",
       description: ctf?.description || "",
+      bannerUrl: ctf?.bannerUrl || "https://picsum.photos/1200/400"
     },
   });
 
   async function onSubmit(data: CtfFormData) {
-    // In a real app, you would call a server action here.
-    console.log({ ...data, id: ctf?.id });
-
-    toast({
-      title: isEditMode ? "CTF Event Updated" : "CTF Event Added",
-      description: `"${data.name}" has been successfully ${isEditMode ? 'updated' : 'added'}. (Simulation)`,
+    startTransition(async () => {
+      const result = await upsertCtf(data, ctf?.id || null);
+      if (result.success && result.data) {
+        toast({
+          title: isEditMode ? "CTF Event Updated" : "CTF Event Added",
+          description: `"${result.data.name}" has been successfully ${isEditMode ? 'updated' : 'added'}.`,
+        });
+        onFormSubmit(result.data);
+      } else {
+        toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive"
+        });
+      }
     });
-    onFormSubmit(); // This will close the dialog
   }
 
   return (
@@ -104,16 +115,29 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="bannerUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Banner Image URL</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://picsum.photos/1200/400" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="space-y-2">
-            <Label htmlFor="banner">Banner Image</Label>
-            <Input id="banner" type="file" />
+            <Label htmlFor="banner">Upload Banner Image</Label>
+            <Input id="banner" type="file" disabled/>
             <p className="text-sm text-muted-foreground">
-              Image upload is for demonstration and won't be saved.
+              Image upload is for demonstration and won't be saved. Please provide a URL.
             </p>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting
+            <Button type="submit" disabled={isPending}>
+              {isPending
                 ? "Saving..."
                 : isEditMode
                 ? "Save Changes"

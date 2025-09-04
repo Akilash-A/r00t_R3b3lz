@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import { teamMembers as initialTeamMembers } from "@/lib/data";
 import type { TeamMember } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
@@ -12,34 +12,47 @@ import { Dialog } from "@/components/ui/dialog";
 import { MemberForm } from "@/components/admin/member-form";
 import { DeleteConfirmationDialog } from "@/components/admin/delete-confirmation-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { deleteMember } from "@/lib/actions";
 
 export default function AdminMembersPage() {
-  // In a real app, this data would be fetched and mutated via server actions
   const [members, setMembers] = useState(initialTeamMembers);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
 
-  const handleFormSubmit = () => {
-    // In a real app, you would re-fetch data from the server after a mutation.
-    // For this scaffold, we just close the dialog. The UI won't update with new data
-    // because we are not actually mutating the source `teamMembers` array.
+  const handleFormSubmit = (newOrUpdatedMember: TeamMember) => {
+    if (selectedMember) {
+      setMembers(members.map(m => m.id === newOrUpdatedMember.id ? newOrUpdatedMember : m));
+    } else {
+      setMembers([newOrUpdatedMember, ...members]);
+    }
     setFormDialogOpen(false);
     setSelectedMember(null);
   };
 
   const handleDeleteConfirm = () => {
     if (!selectedMember) return;
-    // This is a client-side simulation of deletion.
-    // In a real app, you'd call a server action: `await deleteMember(selectedMember.id);`
-    setMembers(members.filter((m) => m.id !== selectedMember.id));
-    toast({
-      title: "Member Deleted",
-      description: `${selectedMember.name} has been removed.`,
+    
+    startTransition(async () => {
+      const result = await deleteMember(selectedMember.id);
+      if (result.success) {
+        setMembers(members.filter((m) => m.id !== selectedMember.id));
+        toast({
+          title: "Member Deleted",
+          description: `${selectedMember.name} has been removed.`,
+        });
+      } else {
+         toast({
+          title: "Error",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+      setDeleteDialogOpen(false);
+      setSelectedMember(null);
     });
-    setDeleteDialogOpen(false);
-    setSelectedMember(null);
   };
   
   const handleAddNew = () => {
@@ -111,7 +124,10 @@ export default function AdminMembersPage() {
         </CardContent>
       </Card>
       
-      <Dialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+      <Dialog open={formDialogOpen} onOpenChange={(open) => {
+        if (!open) setSelectedMember(null);
+        setFormDialogOpen(open);
+      }}>
         <MemberForm member={selectedMember} onFormSubmit={handleFormSubmit} />
       </Dialog>
       
@@ -119,6 +135,7 @@ export default function AdminMembersPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleDeleteConfirm}
+        isPending={isPending}
         title="Are you sure you want to delete this member?"
         description="This action cannot be undone. This will permanently remove the member from the team."
       />

@@ -18,6 +18,7 @@ type DeleteConfirmationDialogProps = {
   onConfirm: () => void;
   title: string;
   description: string;
+  isPending?: boolean;
 };
 
 export function DeleteConfirmationDialog({
@@ -26,6 +27,7 @@ export function DeleteConfirmationDialog({
   onConfirm,
   title,
   description,
+  isPending = false,
 }: DeleteConfirmationDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -35,7 +37,7 @@ export function DeleteConfirmationDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             asChild
             onClick={(e) => {
@@ -43,7 +45,9 @@ export function DeleteConfirmationDialog({
               onConfirm();
             }}
           >
-            <Button variant="destructive">Delete</Button>
+            <Button variant="destructive" disabled={isPending}>
+              {isPending ? "Deleting..." : "Delete"}
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
