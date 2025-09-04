@@ -1,5 +1,6 @@
+
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
-import { Terminal, Home, FileText, Users, LogOut } from "lucide-react";
+import { Terminal, Home, FileText, Users, LogOut, Flag } from "lucide-react";
 import Link from "next/link";
 import { logout } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,14 @@ export default function AdminLayout({
                   <Link href="/admin-page">
                     <Home />
                     Dashboard
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/admin-page/ctfs">
+                    <Flag />
+                    CTF Events
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

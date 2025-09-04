@@ -1,12 +1,15 @@
+
 'use client';
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { challengeSchema, type ChallengeFormData } from "@/lib/definitions";
 import type { Challenge, Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DialogHeader,
   DialogTitle,
@@ -33,6 +36,14 @@ interface WriteupFormProps {
 
 const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev'];
 
+function MarkdownPreview({ content }: { content: string }) {
+  return (
+    <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground whitespace-pre-wrap p-4 border rounded-md min-h-[300px]">
+      {content || <p className="text-muted-foreground">Start typing to see a preview...</p>}
+    </div>
+  )
+}
+
 export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps) {
   const { toast } = useToast();
   const isEditMode = !!challenge;
@@ -47,6 +58,8 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
       writeup: challenge?.writeup || "",
     },
   });
+
+  const writeupContent = useWatch({ control: form.control, name: 'writeup' });
 
   async function onSubmit(data: ChallengeFormData) {
     // In a real app, you would call a server action here.
@@ -141,15 +154,33 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               </FormItem>
             )}
           />
+          <div className="space-y-2">
+            <Label htmlFor="challenge-image">Challenge Image</Label>
+            <Input id="challenge-image" type="file" />
+            <p className="text-sm text-muted-foreground">
+              Image upload is for demonstration and won't be saved.
+            </p>
+          </div>
           <FormField
             control={form.control}
             name="writeup"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Write-up (Markdown)</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="# Title..." {...field} rows={15} />
-                </FormControl>
+                <FormLabel>Write-up</FormLabel>
+                <Tabs defaultValue="edit" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="edit">Markdown</TabsTrigger>
+                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="edit">
+                    <FormControl>
+                      <Textarea placeholder="# Title..." {...field} rows={15} />
+                    </FormControl>
+                  </TabsContent>
+                  <TabsContent value="preview">
+                     <MarkdownPreview content={writeupContent} />
+                  </TabsContent>
+                </Tabs>
                 <FormMessage />
               </FormItem>
             )}
