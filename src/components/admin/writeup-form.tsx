@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 interface WriteupFormProps {
   challenge?: Challenge | null;
@@ -39,7 +40,9 @@ const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Re
 function MarkdownPreview({ content }: { content: string }) {
   return (
     <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground whitespace-pre-wrap p-4 border rounded-md min-h-[300px]">
-      {content || <p className="text-muted-foreground">Start typing to see a preview...</p>}
+      <ReactMarkdown>
+        {content || "Start typing to see a preview..."}
+      </ReactMarkdown>
     </div>
   )
 }
