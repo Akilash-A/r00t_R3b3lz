@@ -246,6 +246,7 @@ export default function AdminWriteupsPage() {
         setFormDialogOpen(open);
       }}>
         <WriteupForm 
+          key={selectedChallenge?.id || 'new'}
           challenge={selectedChallenge} 
           ctfs={ctfs} 
           onFormSubmit={handleFormSubmit} 

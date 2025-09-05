@@ -141,6 +141,19 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
           title: isEditMode ? "Write-up Updated" : "Write-up Added",
           description: `"${result.data.title}" has been successfully ${isEditMode ? 'updated' : 'added'}.`,
         });
+        
+        // Reset form to empty state if we just added a new writeup
+        if (!isEditMode) {
+          form.reset({
+            title: "",
+            ctfId: "",
+            category: undefined,
+            description: "",
+            writeup: "",
+            imageUrl: "",
+          });
+        }
+        
         onFormSubmit(result.data);
       } else {
         toast({
