@@ -20,11 +20,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 
-export default async function CtfPage({ params }: { params: { slug: string } }) {
+export default async function CtfPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const ctfs = await getCtfsFromDB();
   const challenges = await getChallengesFromDB();
   
-  const ctf = ctfs.find((c) => c.slug === params.slug);
+  const ctf = ctfs.find((c) => c.slug === slug);
   if (!ctf) {
     notFound();
   }
