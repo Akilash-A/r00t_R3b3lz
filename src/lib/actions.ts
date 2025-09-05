@@ -12,6 +12,24 @@ const USERNAME = 'T3chC0brA';
 const PASSWORD = 'T3chC0brAT3chC0brA@';
 const COOKIE_NAME = 'r00t-r3b3lz-auth';
 
+// Helper function to delete uploaded images
+async function deleteUploadedImage(imageUrl: string) {
+  if (!imageUrl) return;
+  
+  try {
+    // Extract filename from URL if it's a local upload
+    const url = new URL(imageUrl);
+    if (url.pathname.startsWith('/uploads/')) {
+      const filename = url.pathname.split('/uploads/')[1];
+      await fetch(`${url.origin}/api/upload/delete?filename=${filename}`, {
+        method: 'DELETE'
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting uploaded image:', error);
+  }
+}
+
 type ActionResponse<T> = {
   success: boolean;
   message: string;
@@ -104,16 +122,34 @@ export async function deleteCtf(id: string): Promise<ActionResponse<null>> {
 
     await connectToDatabase();
     
-    // Delete from MongoDB
-    const deletedCtf = await CtfModel.findByIdAndDelete(id);
-    if (!deletedCtf) {
+    // Get CTF details before deleting to clean up images
+    const ctf = await CtfModel.findById(id);
+    if (!ctf) {
       return { success: false, message: "CTF not found." };
     }
 
+    // Delete all challenges associated with this CTF and their images
+    const challenges = await ChallengeModel.find({ ctfId: id });
+    for (const challenge of challenges) {
+      if (challenge.imageUrl) {
+        await deleteUploadedImage(challenge.imageUrl);
+      }
+    }
+    await ChallengeModel.deleteMany({ ctfId: id });
+
+    // Delete CTF banner image
+    if (ctf.bannerUrl) {
+      await deleteUploadedImage(ctf.bannerUrl);
+    }
+
+    // Delete the CTF itself
+    await CtfModel.findByIdAndDelete(id);
+
     revalidatePath('/admin-page/ctfs');
     revalidatePath('/admin-page');
+    revalidatePath('/admin-page/writeups');
     revalidatePath('/');
-    return { success: true, message: "CTF deleted successfully." };
+    return { success: true, message: "CTF and all associated data deleted successfully." };
   } catch(error) {
     console.error('Error deleting CTF:', error);
     return { success: false, message: "An error occurred." };
@@ -186,11 +222,19 @@ export async function deleteMember(id: string): Promise<ActionResponse<null>> {
 
     await connectToDatabase();
     
-    // Delete from MongoDB
-    const deletedMember = await TeamMemberModel.findByIdAndDelete(id);
-    if (!deletedMember) {
+    // Get member details before deleting to clean up avatar image
+    const member = await TeamMemberModel.findById(id);
+    if (!member) {
       return { success: false, message: "Member not found." };
     }
+
+    // Delete avatar image if it exists
+    if (member.avatarUrl) {
+      await deleteUploadedImage(member.avatarUrl);
+    }
+
+    // Delete from MongoDB
+    await TeamMemberModel.findByIdAndDelete(id);
 
     revalidatePath('/admin-page/members');
     revalidatePath('/admin-page');
@@ -279,13 +323,18 @@ export async function deleteChallenge(id: string): Promise<ActionResponse<null>>
 
     await connectToDatabase();
     
-    // Get challenge before deleting to find associated CTF
+    // Get challenge before deleting to find associated CTF and clean up images
     const challenge = await ChallengeModel.findById(id);
     if (!challenge) {
       return { success: false, message: "Challenge not found." };
     }
 
     const ctf = await CtfModel.findById(challenge.ctfId);
+
+    // Delete challenge image if it exists
+    if (challenge.imageUrl) {
+      await deleteUploadedImage(challenge.imageUrl);
+    }
 
     // Delete from MongoDB
     await ChallengeModel.findByIdAndDelete(id);
