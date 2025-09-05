@@ -1,4 +1,4 @@
-import { teamMembers } from '@/lib/data';
+import { getTeamMembersFromDB } from '@/lib/data';
 import { MemberCard } from '@/components/member-card';
 
 // Add metadata for better SEO and performance
@@ -7,7 +7,8 @@ export const metadata = {
   description: 'Meet our CTF team members',
 };
 
-export default function MembersPage() {
+export default async function MembersPage() {
+  const teamMembers = await getTeamMembersFromDB();
   return (
     <div className="container mx-auto py-16 md:py-24 px-4 pt-32">
       <div className="text-center mb-16">

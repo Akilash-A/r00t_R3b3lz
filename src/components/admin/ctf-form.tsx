@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { upsertCtf } from "@/lib/actions";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
+import { Upload } from "lucide-react";
 
 interface CtfFormProps {
   ctf?: Ctf | null;
@@ -36,6 +37,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
   const { toast } = useToast();
   const isEditMode = !!ctf;
   const [isPending, startTransition] = useTransition();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<CtfFormData>({
     resolver: zodResolver(ctfSchema),
@@ -46,6 +48,44 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
       bannerUrl: ctf?.bannerUrl || "https://picsum.photos/1200/400"
     },
   });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update the banner URL field with the uploaded image URL
+        form.setValue('bannerUrl', `${window.location.origin}${result.url}`);
+        toast({
+          title: "Image Uploaded",
+          description: "Banner image has been uploaded successfully.",
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Error",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   async function onSubmit(data: CtfFormData) {
     startTransition(async () => {
@@ -130,9 +170,26 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
           />
           <div className="space-y-2">
             <Label htmlFor="banner">Upload Banner Image</Label>
-            <Input id="banner" type="file" disabled/>
+            <div className="flex items-center gap-2">
+              <Input 
+                id="banner" 
+                type="file" 
+                accept="image/*"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                className="cursor-pointer"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={isUploading}
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+            </div>
             <p className="text-sm text-muted-foreground">
-              Image upload is for demonstration and won't be saved. Please provide a URL.
+              {isUploading ? "Uploading..." : "Upload an image file (max 5MB) or provide a URL above."}
             </p>
           </div>
           <DialogFooter>

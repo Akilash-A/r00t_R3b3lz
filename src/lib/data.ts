@@ -1,8 +1,63 @@
 import type { Ctf, Challenge, TeamMember } from './definitions';
+import connectToDatabase from './mongodb';
+import { CtfModel, ChallengeModel, TeamMemberModel } from './models';
 
-// Changed to `let` to allow for mutations in this demo application.
-// In a real application, this would be a database.
-export let ctfs: Ctf[] = [
+// Database functions
+export async function getCtfsFromDB(): Promise<Ctf[]> {
+  try {
+    await connectToDatabase();
+    const ctfs = await CtfModel.find({}).sort({ createdAt: -1 }).lean();
+    return ctfs.map((ctf: any) => ({
+      id: ctf._id.toString(),
+      slug: ctf.slug,
+      name: ctf.name,
+      bannerUrl: ctf.bannerUrl,
+      description: ctf.description
+    }));
+  } catch (error) {
+    console.error('Error fetching CTFs from database:', error);
+    return defaultCtfs;
+  }
+}
+
+export async function getChallengesFromDB(): Promise<Challenge[]> {
+  try {
+    await connectToDatabase();
+    const challenges = await ChallengeModel.find({}).populate('ctfId').sort({ createdAt: -1 }).lean();
+    return challenges.map((challenge: any) => ({
+      id: challenge._id.toString(),
+      ctfId: challenge.ctfId.toString(),
+      title: challenge.title,
+      category: challenge.category,
+      description: challenge.description,
+      writeup: challenge.writeup,
+      imageUrl: challenge.imageUrl
+    }));
+  } catch (error) {
+    console.error('Error fetching challenges from database:', error);
+    return defaultChallenges;
+  }
+}
+
+export async function getTeamMembersFromDB(): Promise<TeamMember[]> {
+  try {
+    await connectToDatabase();
+    const members = await TeamMemberModel.find({}).sort({ createdAt: -1 }).lean();
+    return members.map((member: any) => ({
+      id: member._id.toString(),
+      name: member.name,
+      handle: member.handle,
+      role: member.role,
+      avatarUrl: member.avatarUrl
+    }));
+  } catch (error) {
+    console.error('Error fetching team members from database:', error);
+    return defaultTeamMembers;
+  }
+}
+
+// Fallback data for development/demo purposes
+export const defaultCtfs: Ctf[] = [
   {
     id: '1',
     slug: 'functf-2024',
@@ -26,7 +81,7 @@ export let ctfs: Ctf[] = [
   },
 ];
 
-export let challenges: Challenge[] = [
+export const defaultChallenges: Challenge[] = [
   // FuncTF 2024 Challenges
   {
     id: '101',
@@ -104,7 +159,7 @@ Flag: \`securinets{pwn_all_the_things}\`
   },
 ];
 
-export let teamMembers: TeamMember[] = [
+export const defaultTeamMembers: TeamMember[] = [
   {
     id: '1',
     name: 'T3chC0brA',
@@ -134,3 +189,8 @@ export let teamMembers: TeamMember[] = [
     avatarUrl: 'https://picsum.photos/203/203',
   },
 ];
+
+// Export live data for backward compatibility
+export let ctfs: Ctf[] = defaultCtfs;
+export let challenges: Challenge[] = defaultChallenges;
+export let teamMembers: TeamMember[] = defaultTeamMembers;

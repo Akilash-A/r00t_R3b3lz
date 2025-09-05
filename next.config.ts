@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
         hostname: 'drive.google.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '9002',
+        pathname: '/uploads/**',
       }
     ],
   },

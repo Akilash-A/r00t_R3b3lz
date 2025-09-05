@@ -1,4 +1,4 @@
-import { ctfs, challenges } from '@/lib/data';
+import { getCtfsFromDB, getChallengesFromDB } from '@/lib/data';
 import type { Challenge } from '@/lib/definitions';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -19,7 +19,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
 
-export default function CtfPage({ params }: { params: { slug: string } }) {
+export default async function CtfPage({ params }: { params: { slug: string } }) {
+  const ctfs = await getCtfsFromDB();
+  const challenges = await getChallengesFromDB();
+  
   const ctf = ctfs.find((c) => c.slug === params.slug);
   if (!ctf) {
     notFound();

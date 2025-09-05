@@ -1,8 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useTransition } from "react";
-import { challenges as initialChallenges, ctfs as initialCtfs } from "@/lib/data";
+import React, { useState, useMemo, useTransition, useEffect } from "react";
 import type { Challenge, Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,21 +26,54 @@ import { deleteChallenge } from "@/lib/actions";
 const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev'];
 
 export default function AdminWriteupsPage() {
-  const [challenges, setChallenges] = useState(initialChallenges);
-  const [ctfs, setCtfs] = useState(initialCtfs); // Although not mutated, good practice to have it in state
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [ctfs, setCtfs] = useState<Ctf[]>([]);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const [nameFilter, setNameFilter] = useState('');
-  const [ctfFilter, setCtfFilter] = useState<Record<string, boolean>>(
-    ctfs.reduce((acc, ctf) => ({ ...acc, [ctf.id]: true }), {})
-  );
+  const [ctfFilter, setCtfFilter] = useState<Record<string, boolean>>({});
   const [categoryFilter, setCategoryFilter] = useState<Record<string, boolean>>(
     categories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {})
   );
+
+  // Load data from API on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [challengesResponse, ctfsResponse] = await Promise.all([
+          fetch('/api/challenges'),
+          fetch('/api/ctfs')
+        ]);
+        
+        const challengesResult = await challengesResponse.json();
+        const ctfsResult = await ctfsResponse.json();
+        
+        if (challengesResult.success && ctfsResult.success) {
+          setChallenges(challengesResult.data);
+          setCtfs(ctfsResult.data);
+          setCtfFilter(ctfsResult.data.reduce((acc: Record<string, boolean>, ctf: Ctf) => ({ ...acc, [ctf.id]: true }), {}));
+        } else {
+          throw new Error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load data from database.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [toast]);
 
   const filteredChallenges = useMemo(() => {
     return challenges
@@ -168,28 +200,42 @@ export default function AdminWriteupsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredChallenges.map((challenge) => {
-                const ctf = ctfs.find(c => c.id === challenge.ctfId);
-                return (
-                  <TableRow key={challenge.id}>
-                    <TableCell className="font-medium">{challenge.title}</TableCell>
-                    <TableCell>{ctf?.name || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{challenge.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(challenge)}>
-                        <Edit />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(challenge)}>
-                        <Trash2 />
-                         <span className="sr-only">Delete</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    Loading writeups...
+                  </TableCell>
+                </TableRow>
+              ) : filteredChallenges.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    {challenges.length === 0 ? "No writeups found. Create your first writeup!" : "No writeups match your filters."}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredChallenges.map((challenge) => {
+                  const ctf = ctfs.find(c => c.id === challenge.ctfId);
+                  return (
+                    <TableRow key={challenge.id}>
+                      <TableCell className="font-medium">{challenge.title}</TableCell>
+                      <TableCell>{ctf?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{challenge.category}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(challenge)}>
+                          <Edit />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(challenge)}>
+                          <Trash2 />
+                           <span className="sr-only">Delete</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </CardContent>

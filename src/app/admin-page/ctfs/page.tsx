@@ -1,8 +1,7 @@
 
 'use client';
 
-import React, { useState, useTransition } from "react";
-import { ctfs as initialCtfs } from "@/lib/data";
+import React, { useState, useTransition, useEffect } from "react";
 import type { Ctf } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,12 +15,40 @@ import Image from "next/image";
 import { deleteCtf } from "@/lib/actions";
 
 export default function AdminCtfsPage() {
-  const [ctfs, setCtfs] = useState(initialCtfs);
+  const [ctfs, setCtfs] = useState<Ctf[]>([]);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCtf, setSelectedCtf] = useState<Ctf | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Load CTFs from API on component mount
+  useEffect(() => {
+    loadCtfs();
+  }, [toast]);
+
+  const loadCtfs = async () => {
+    try {
+      const response = await fetch('/api/ctfs');
+      const result = await response.json();
+      
+      if (result.success) {
+        setCtfs(result.data);
+      } else {
+        throw new Error(result.error || 'Failed to fetch CTFs');
+      }
+    } catch (error) {
+      console.error('Error loading CTFs:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load CTFs from database.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFormSubmit = (newOrUpdatedCtf: Ctf) => {
     if (selectedCtf) {
@@ -31,6 +58,8 @@ export default function AdminCtfsPage() {
     }
     setFormDialogOpen(false);
     setSelectedCtf(null);
+    // Refresh data from server
+    loadCtfs();
   };
 
   const handleDeleteConfirm = () => {
@@ -44,6 +73,8 @@ export default function AdminCtfsPage() {
           title: "CTF Event Deleted",
           description: `"${selectedCtf.name}" has been removed.`,
         });
+        // Refresh data from server
+        loadCtfs();
       } else {
         toast({
           title: "Error",
@@ -94,30 +125,44 @@ export default function AdminCtfsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ctfs.map((ctf) => (
-                <TableRow key={ctf.id}>
-                  <TableCell className="font-medium">{ctf.name}</TableCell>
-                  <TableCell>
-                    <Image
-                      src={ctf.bannerUrl}
-                      alt={ctf.name}
-                      width={120}
-                      height={40}
-                      className="rounded-md object-cover"
-                    />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(ctf)}>
-                      <Edit />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(ctf)}>
-                      <Trash2 />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8">
+                    Loading CTF events...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : ctfs.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center py-8">
+                    No CTF events found. Create your first event!
+                  </TableCell>
+                </TableRow>
+              ) : (
+                ctfs.map((ctf) => (
+                  <TableRow key={ctf.id}>
+                    <TableCell className="font-medium">{ctf.name}</TableCell>
+                    <TableCell>
+                      <Image
+                        src={ctf.bannerUrl}
+                        alt={ctf.name}
+                        width={120}
+                        height={40}
+                        className="rounded-md object-cover"
+                      />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(ctf)}>
+                        <Edit />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(ctf)}>
+                        <Trash2 />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

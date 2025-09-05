@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from "react";
-import { teamMembers as initialTeamMembers } from "@/lib/data";
+import React, { useState, useTransition, useEffect } from "react";
 import type { TeamMember } from "@/lib/definitions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,12 +14,40 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteMember } from "@/lib/actions";
 
 export default function AdminMembersPage() {
-  const [members, setMembers] = useState(initialTeamMembers);
+  const [members, setMembers] = useState<TeamMember[]>([]);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  // Load members from API on component mount
+  useEffect(() => {
+    const loadMembers = async () => {
+      try {
+        const response = await fetch('/api/members');
+        const result = await response.json();
+        
+        if (result.success) {
+          setMembers(result.data);
+        } else {
+          throw new Error(result.error || 'Failed to fetch members');
+        }
+      } catch (error) {
+        console.error('Error loading members:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load members from database.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadMembers();
+  }, [toast]);
 
   const handleFormSubmit = (newOrUpdatedMember: TeamMember) => {
     if (selectedMember) {
@@ -94,31 +121,45 @@ export default function AdminMembersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {members.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={member.avatarUrl} alt={member.name} data-ai-hint="hacker portrait" />
-                        <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      {member.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>{member.handle}</TableCell>
-                  <TableCell>{member.role}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
-                      <Edit />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(member)}>
-                      <Trash2 />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    Loading team members...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : members.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8">
+                    No team members found. Add your first member!
+                  </TableCell>
+                </TableRow>
+              ) : (
+                members.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={member.avatarUrl} alt={member.name} data-ai-hint="hacker portrait" />
+                          <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        {member.name}
+                      </div>
+                    </TableCell>
+                    <TableCell>{member.handle}</TableCell>
+                    <TableCell>{member.role}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
+                        <Edit />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(member)}>
+                        <Trash2 />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
