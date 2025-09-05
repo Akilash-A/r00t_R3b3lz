@@ -45,7 +45,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
       name: ctf?.name || "",
       slug: ctf?.slug || "",
       description: ctf?.description || "",
-      bannerUrl: ctf?.bannerUrl || "https://picsum.photos/1200/400"
+      bannerUrl: ctf?.bannerUrl || ""
     },
   });
 
@@ -162,7 +162,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               <FormItem>
                 <FormLabel>Banner Image URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter banner image URL (e.g., https://example.com/banner.jpg)" {...field} />
+                  <Input placeholder="Enter banner image URL or upload below" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -37,14 +37,16 @@ interface WriteupFormProps {
   onFormSubmit: (challenge: Challenge) => void;
 }
 
-const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev'];
+const categories: Challenge['category'][] = ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev', 'OSINT'];
 
 function MarkdownPreview({ content }: { content: string }) {
   return (
-    <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground whitespace-pre-wrap p-3 border rounded-md bg-background text-foreground border-border overflow-y-auto max-w-none w-full min-h-[380px]">
-      <ReactMarkdown>
-        {content || "Start typing to see a preview..."}
-      </ReactMarkdown>
+    <div className="p-3 border rounded-md bg-background text-foreground border-border overflow-y-auto max-w-none w-full min-h-[380px]">
+      <div className="prose prose-invert prose-sm prose-headings:text-foreground prose-headings:mb-2 prose-headings:mt-4 prose-p:text-muted-foreground prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ul:my-2 prose-li:text-muted-foreground prose-li:my-0 prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded max-w-none">
+        <ReactMarkdown>
+          {content || "Start typing to see a preview..."}
+        </ReactMarkdown>
+      </div>
     </div>
   )
 }
@@ -248,7 +250,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
                 <FormLabel className="text-foreground">Challenge Image URL</FormLabel>
                 <FormControl>
                   <Input 
-                    placeholder="Enter challenge image URL (e.g., https://example.com/challenge.png)" 
+                    placeholder="Enter challenge image URL or upload below" 
                     {...field} 
                     className="bg-background text-foreground border-border"
                   />

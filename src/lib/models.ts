@@ -11,7 +11,7 @@ export interface ICtf extends Document {
 export interface IChallenge extends Document {
   ctfId: mongoose.Types.ObjectId;
   title: string;
-  category: 'Web' | 'Pwn' | 'Crypto' | 'Misc' | 'Rev';
+  category: 'Web' | 'Pwn' | 'Crypto' | 'Misc' | 'Rev' | 'OSINT';
   description: string;
   writeup: string;
   imageUrl?: string;
@@ -41,7 +41,7 @@ const ChallengeSchema = new Schema<IChallenge>({
   category: { 
     type: String, 
     required: true,
-    enum: ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev']
+    enum: ['Web', 'Pwn', 'Crypto', 'Misc', 'Rev', 'OSINT']
   },
   description: { type: String, required: true },
   writeup: { type: String, required: true },

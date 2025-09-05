@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { upsertMember } from "@/lib/actions";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 
 interface MemberFormProps {
   member?: TeamMember | null;
@@ -35,6 +35,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
   const { toast } = useToast();
   const isEditMode = !!member;
   const [isPending, startTransition] = useTransition();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
@@ -42,9 +43,53 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
       name: member?.name || "",
       handle: member?.handle || "",
       role: member?.role || "",
-      avatarUrl: member?.avatarUrl || "https://picsum.photos/200/200",
+      avatarUrl: member?.avatarUrl || "",
     },
   });
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      form.setValue('avatarUrl', result.url);
+      toast({
+        title: "Success",
+        description: "Avatar uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload avatar. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   async function onSubmit(data: MemberFormData) {
     startTransition(async () => {
@@ -121,7 +166,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Avatar URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter avatar image URL (e.g., https://example.com/avatar.jpg)" {...field} />
+                  <Input placeholder="Enter avatar image URL or upload below" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -129,9 +174,15 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
           />
           <div className="space-y-2">
             <Label htmlFor="avatar">Upload Avatar</Label>
-            <Input id="avatar" type="file" disabled />
+            <Input 
+              id="avatar" 
+              type="file" 
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={isUploading}
+            />
             <p className="text-sm text-muted-foreground">
-              Image upload is for demonstration and won't be saved. Please provide a URL.
+              {isUploading ? "Uploading..." : "Upload an image file to automatically fill the avatar URL above."}
             </p>
           </div>
           <DialogFooter>
