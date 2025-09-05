@@ -22,7 +22,14 @@ export type Challenge = {
 export type TeamMember = {
   id:string;
   name: string;
-  handle: string;
+  social: {
+    instagram?: string;
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+    email?: string;
+    website?: string;
+  };
   role: string;
   avatarUrl: string;
 };
@@ -43,15 +50,23 @@ export const ctfSchema = z.object({
 
 export const memberSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
-  handle: z.string().min(2, { message: "Handle must be at least 2 characters." }).startsWith('@', { message: "Handle must start with '@'." }),
+  social: z.object({
+    instagram: z.string().optional(),
+    twitter: z.string().optional(),
+    github: z.string().optional(),
+    linkedin: z.string().optional(),
+    email: z.string().email().optional().or(z.literal('')),
+    website: z.string().url().optional().or(z.literal('')),
+  }),
   role: z.string().min(1, { message: "Role is required." }),
   avatarUrl: z.string().refine((val) => {
     if (val === "") return true; // Allow empty
     if (val.startsWith('/uploads/')) return true; // Allow uploaded files
+    if (val.startsWith('/placeholder-')) return true; // Allow placeholder files
     return z.string().url().safeParse(val).success; // Allow valid URLs
   }, {
     message: "Please enter a valid URL or upload an image.",
-  }),
+  }).optional(),
 });
 
 export const challengeSchema = z.object({

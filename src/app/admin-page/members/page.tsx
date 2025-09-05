@@ -115,7 +115,7 @@ export default function AdminMembersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Handle</TableHead>
+                <TableHead>Social Media</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -145,7 +145,31 @@ export default function AdminMembersPage() {
                         {member.name}
                       </div>
                     </TableCell>
-                    <TableCell>{member.handle}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {member.social?.instagram && (
+                          <span className="text-xs bg-pink-100 text-pink-800 px-2 py-1 rounded">IG</span>
+                        )}
+                        {member.social?.twitter && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">X</span>
+                        )}
+                        {member.social?.github && (
+                          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">GH</span>
+                        )}
+                        {member.social?.linkedin && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">LI</span>
+                        )}
+                        {member.social?.email && (
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">@</span>
+                        )}
+                        {member.social?.website && (
+                          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Web</span>
+                        )}
+                        {!Object.values(member.social || {}).some(v => v) && (
+                          <span className="text-xs text-muted-foreground">No social links</span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{member.role}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>

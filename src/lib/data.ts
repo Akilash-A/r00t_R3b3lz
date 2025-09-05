@@ -59,7 +59,7 @@ export async function getTeamMembersFromDB(): Promise<TeamMember[]> {
     return members.map((member: any) => ({
       id: member._id.toString(),
       name: member.name,
-      handle: member.handle,
+      social: member.social || {},
       role: member.role,
       avatarUrl: member.avatarUrl
     }));
@@ -176,28 +176,45 @@ export const defaultTeamMembers: TeamMember[] = [
   {
     id: '1',
     name: 'T3chC0brA',
-    handle: '@T3chC0brA',
+    social: {
+      github: 'https://github.com/techcobra',
+      twitter: 'https://x.com/techcobra',
+      linkedin: 'https://linkedin.com/in/techcobra',
+      email: 'techcobra@example.com'
+    },
     role: 'Team Lead & Pwn Expert',
     avatarUrl: 'https://picsum.photos/200/200',
   },
   {
     id: '2',
     name: 'Cryp70K1n9',
-    handle: '@Cryp70K1n9',
+    social: {
+      github: 'https://github.com/cryp70k1n9',
+      twitter: 'https://x.com/cryp70k1n9',
+      instagram: 'https://instagram.com/cryp70k1n9'
+    },
     role: 'Crypto Specialist',
     avatarUrl: 'https://picsum.photos/201/201',
   },
   {
     id: '3',
     name: 'WebSlinger',
-    handle: '@WebSlinger',
+    social: {
+      github: 'https://github.com/webslinger',
+      linkedin: 'https://linkedin.com/in/webslinger',
+      website: 'https://webslinger.dev'
+    },
     role: 'Web Exploitation Guru',
     avatarUrl: 'https://picsum.photos/202/202',
   },
   {
     id: '4',
     name: 'RevEngeR',
-    handle: '@RevEngeR',
+    social: {
+      github: 'https://github.com/revenger',
+      twitter: 'https://x.com/revenger',
+      email: 'revenger@example.com'
+    },
     role: 'Reverse Engineering Pro',
     avatarUrl: 'https://picsum.photos/203/203',
   },

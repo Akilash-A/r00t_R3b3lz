@@ -19,7 +19,14 @@ export interface IChallenge extends Document {
 
 export interface ITeamMember extends Document {
   name: string;
-  handle: string;
+  social: {
+    instagram?: string;
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+    email?: string;
+    website?: string;
+  };
   role: string;
   avatarUrl: string;
 }
@@ -53,9 +60,16 @@ const ChallengeSchema = new Schema<IChallenge>({
 // Team Member Schema
 const TeamMemberSchema = new Schema<ITeamMember>({
   name: { type: String, required: true },
-  handle: { type: String, required: true },
+  social: {
+    instagram: { type: String },
+    twitter: { type: String },
+    github: { type: String },
+    linkedin: { type: String },
+    email: { type: String },
+    website: { type: String }
+  },
   role: { type: String, required: true },
-  avatarUrl: { type: String, required: true }
+  avatarUrl: { type: String, default: '' }
 }, {
   timestamps: true
 });

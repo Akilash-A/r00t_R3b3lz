@@ -165,6 +165,13 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
   }
 
   const { data } = validatedFields;
+  
+  // Ensure avatarUrl has a default value if empty
+  const memberData = {
+    ...data,
+    avatarUrl: data.avatarUrl || '/placeholder-avatar.svg'
+  };
+  
   let newOrUpdatedMember: TeamMember;
 
   try {
@@ -174,7 +181,7 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
       // Update existing member
       const updatedMember = await TeamMemberModel.findByIdAndUpdate(
         id,
-        data,
+        memberData,
         { new: true, runValidators: true }
       );
       
@@ -185,19 +192,19 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
       newOrUpdatedMember = {
         id: (updatedMember as any)._id.toString(),
         name: updatedMember.name,
-        handle: updatedMember.handle,
+        social: updatedMember.social || {},
         role: updatedMember.role,
         avatarUrl: updatedMember.avatarUrl
       };
     } else {
       // Create new member
-      const newMember = new TeamMemberModel(data);
+      const newMember = new TeamMemberModel(memberData);
       const savedMember = await newMember.save();
       
       newOrUpdatedMember = {
         id: (savedMember as any)._id.toString(),
         name: savedMember.name,
-        handle: savedMember.handle,
+        social: savedMember.social || {},
         role: savedMember.role,
         avatarUrl: savedMember.avatarUrl
       };
