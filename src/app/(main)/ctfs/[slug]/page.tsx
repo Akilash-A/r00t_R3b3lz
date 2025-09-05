@@ -2,6 +2,7 @@ import { getCtfsFromDB, getChallengesFromDB } from '@/lib/data';
 import type { Challenge } from '@/lib/definitions';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
 import {
   Accordion,
   AccordionContent,
@@ -79,8 +80,26 @@ export default async function CtfPage({ params }: { params: { slug: string } }) 
                               From {ctf.name} - {challenge.category}
                              </DialogDescription>
                            </DialogHeader>
-                           <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-p:text-muted-foreground prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-li:text-muted-foreground whitespace-pre-wrap">
-                            {challenge.writeup}
+                           <div className="space-y-6">
+                             {/* Challenge Image - Display first if available */}
+                             {challenge.imageUrl && (
+                               <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden border border-border">
+                                 <Image
+                                   src={challenge.imageUrl}
+                                   alt={`${challenge.title} challenge image`}
+                                   fill
+                                   className="object-contain bg-muted"
+                                   priority
+                                 />
+                               </div>
+                             )}
+                             
+                             {/* Markdown Content */}
+                             <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-headings:mb-2 prose-headings:mt-4 prose-p:text-muted-foreground prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ul:my-2 prose-li:text-muted-foreground prose-li:my-0 prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground max-w-none">
+                               <ReactMarkdown>
+                                 {challenge.writeup || "No writeup content available."}
+                               </ReactMarkdown>
+                             </div>
                            </div>
                          </DialogContent>
                        </Dialog>
