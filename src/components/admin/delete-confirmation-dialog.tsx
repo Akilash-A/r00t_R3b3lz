@@ -39,15 +39,14 @@ export function DeleteConfirmationDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            asChild
             onClick={(e) => {
               e.preventDefault();
               onConfirm();
             }}
+            disabled={isPending}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            <Button variant="destructive" disabled={isPending}>
-              {isPending ? "Deleting..." : "Delete"}
-            </Button>
+            {isPending ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

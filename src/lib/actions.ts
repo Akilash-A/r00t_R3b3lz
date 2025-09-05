@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import mongoose from 'mongoose';
 import { ctfSchema, memberSchema, challengeSchema, Ctf, TeamMember, Challenge } from './definitions';
 import connectToDatabase from './mongodb';
 import { CtfModel, ChallengeModel, TeamMemberModel } from './models';
@@ -96,6 +97,11 @@ export async function upsertCtf(formData: unknown, id: string | null): Promise<A
 
 export async function deleteCtf(id: string): Promise<ActionResponse<null>> {
   try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, message: "Invalid CTF ID. This CTF cannot be deleted from the database." };
+    }
+
     await connectToDatabase();
     
     // Delete from MongoDB
@@ -173,6 +179,11 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
 
 export async function deleteMember(id: string): Promise<ActionResponse<null>> {
    try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, message: "Invalid member ID. This member cannot be deleted from the database." };
+    }
+
     await connectToDatabase();
     
     // Delete from MongoDB
@@ -261,6 +272,11 @@ export async function upsertChallenge(formData: unknown, id: string | null): Pro
 
 export async function deleteChallenge(id: string): Promise<ActionResponse<null>> {
    try {
+    // Check if the ID is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return { success: false, message: "Invalid challenge ID. This challenge cannot be deleted from the database." };
+    }
+
     await connectToDatabase();
     
     // Get challenge before deleting to find associated CTF
@@ -283,5 +299,46 @@ export async function deleteChallenge(id: string): Promise<ActionResponse<null>>
   } catch(error) {
     console.error('Error deleting challenge:', error);
     return { success: false, message: "An error occurred." };
+  }
+}
+
+// Cleanup function to remove orphaned challenges
+export async function cleanupOrphanedChallenges(): Promise<ActionResponse<null>> {
+  try {
+    await connectToDatabase();
+    
+    // Remove challenges with null or missing ctfId
+    const result = await ChallengeModel.deleteMany({ 
+      $or: [
+        { ctfId: null },
+        { ctfId: { $exists: false } }
+      ]
+    });
+    
+    // Remove challenges that reference non-existent CTFs
+    const allChallenges = await ChallengeModel.find({});
+    let orphanedCount = 0;
+    
+    for (const challenge of allChallenges) {
+      if (challenge.ctfId) {
+        const ctfExists = await CtfModel.findById(challenge.ctfId);
+        if (!ctfExists) {
+          await ChallengeModel.findByIdAndDelete(challenge._id);
+          orphanedCount++;
+        }
+      }
+    }
+    
+    const totalDeleted = result.deletedCount + orphanedCount;
+    
+    revalidatePath('/admin-page/writeups');
+    revalidatePath('/admin-page');
+    return { 
+      success: true, 
+      message: `Cleanup completed. Removed ${totalDeleted} orphaned challenges.` 
+    };
+  } catch (error) {
+    console.error('Error cleaning up orphaned challenges:', error);
+    return { success: false, message: "An error occurred during cleanup." };
   }
 }

@@ -23,16 +23,29 @@ export async function getCtfsFromDB(): Promise<Ctf[]> {
 export async function getChallengesFromDB(): Promise<Challenge[]> {
   try {
     await connectToDatabase();
+    
+    // First, clean up any orphaned challenges (challenges with null or invalid ctfId)
+    await ChallengeModel.deleteMany({ 
+      $or: [
+        { ctfId: null },
+        { ctfId: { $exists: false } }
+      ]
+    });
+    
     const challenges = await ChallengeModel.find({}).populate('ctfId').sort({ createdAt: -1 }).lean();
-    return challenges.map((challenge: any) => ({
-      id: challenge._id.toString(),
-      ctfId: challenge.ctfId.toString(),
-      title: challenge.title,
-      category: challenge.category,
-      description: challenge.description,
-      writeup: challenge.writeup,
-      imageUrl: challenge.imageUrl
-    }));
+    
+    // Filter out challenges with null or missing ctfId and map the valid ones
+    return challenges
+      .filter((challenge: any) => challenge.ctfId && challenge._id)
+      .map((challenge: any) => ({
+        id: challenge._id.toString(),
+        ctfId: challenge.ctfId._id ? challenge.ctfId._id.toString() : challenge.ctfId.toString(),
+        title: challenge.title,
+        category: challenge.category,
+        description: challenge.description,
+        writeup: challenge.writeup,
+        imageUrl: challenge.imageUrl
+      }));
   } catch (error) {
     console.error('Error fetching challenges from database:', error);
     return defaultChallenges;
