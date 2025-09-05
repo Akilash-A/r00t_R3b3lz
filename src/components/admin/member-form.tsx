@@ -82,7 +82,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="T3chC0brA" {...field} />
+                  <Input placeholder="Enter full name (e.g., John Doe)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -95,7 +95,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Handle</FormLabel>
                 <FormControl>
-                  <Input placeholder="@T3chC0brA" {...field} />
+                  <Input placeholder="Enter handle (e.g., @johndoe)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -108,7 +108,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Role</FormLabel>
                 <FormControl>
-                  <Input placeholder="Team Lead & Pwn Expert" {...field} />
+                  <Input placeholder="Enter role (e.g., Team Lead & Pwn Expert)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -121,7 +121,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               <FormItem>
                 <FormLabel>Avatar URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://picsum.photos/200/200" {...field} />
+                  <Input placeholder="Enter avatar image URL (e.g., https://example.com/avatar.jpg)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

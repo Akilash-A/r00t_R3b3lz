@@ -103,7 +103,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               <FormItem>
                 <FormLabel>Challenge Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Login Bypass" {...field} />
+                  <Input placeholder="Enter challenge title (e.g., Login Bypass)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -119,7 +119,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a CTF" />
+                        <SelectValue placeholder="Select a CTF event" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -141,7 +141,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Select challenge category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -162,7 +162,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               <FormItem>
                 <FormLabel>Short Description</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="A simple challenge to get you started..." {...field} />
+                  <Textarea placeholder="Enter challenge description (e.g., A simple challenge to get you started with web exploitation...)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -175,7 +175,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               <FormItem>
                 <FormLabel>Challenge Image URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://example.com/image.png" {...field} />
+                  <Input placeholder="Enter challenge image URL (e.g., https://example.com/challenge.png)" {...field} />
                 </FormControl>
                  <p className="text-sm text-muted-foreground">
                     Provide a direct URL to an image for the challenge.
@@ -204,7 +204,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
                   </TabsList>
                   <TabsContent value="edit">
                     <FormControl>
-                      <Textarea placeholder="# Title..." {...field} rows={15} />
+                      <Textarea placeholder="Enter write-up content in Markdown format (e.g., # Challenge Title...)" {...field} rows={15} />
                     </FormControl>
                   </TabsContent>
                   <TabsContent value="preview">

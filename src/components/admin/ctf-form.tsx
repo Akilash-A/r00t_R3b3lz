@@ -123,7 +123,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               <FormItem>
                 <FormLabel>Event Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="FuncTF 2024" {...field} />
+                  <Input placeholder="Enter event name (e.g., FuncTF 2024)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -136,7 +136,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               <FormItem>
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="functf-2024" {...field} />
+                  <Input placeholder="Enter URL slug (e.g., functf-2024)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,7 +149,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="A beginner-friendly CTF..." {...field} />
+                  <Textarea placeholder="Enter event description (e.g., A beginner-friendly CTF with diverse challenges...)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -162,7 +162,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               <FormItem>
                 <FormLabel>Banner Image URL</FormLabel>
                 <FormControl>
-                  <Input placeholder="https://picsum.photos/1200/400" {...field} />
+                  <Input placeholder="Enter banner image URL (e.g., https://example.com/banner.jpg)" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
