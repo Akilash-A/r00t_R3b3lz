@@ -1,13 +1,16 @@
 
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { getCtfsFromDB, getChallengesFromDB, getTeamMembersFromDB } from "@/lib/data";
+import type { Ctf, Challenge, TeamMember } from "@/lib/definitions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, FileText, Users, Flag } from "lucide-react";
 
 export default async function AdminDashboardPage() {
   // Fetch real data from database
-  let ctfs, challenges, teamMembers;
+  let ctfs: Ctf[] = [];
+  let challenges: Challenge[] = [];
+  let teamMembers: TeamMember[] = [];
   
   try {
     [ctfs, challenges, teamMembers] = await Promise.all([
