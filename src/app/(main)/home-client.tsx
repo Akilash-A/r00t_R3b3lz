@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { CtfCard } from '@/components/ctf-card';
 import { Sparkles } from 'lucide-react';
 import type { Ctf } from '@/lib/definitions';
+import ElectricBorder from '@/components/ui/electric-border';
 
 // Dynamically import DotGrid only for homepage to improve initial load
 const DotGrid = dynamic(() => import('@/components/dot-grid'), {
@@ -72,7 +73,17 @@ export default function HomePageClient({ ctfs }: HomePageClientProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {ctfs.map((ctf, i) => (
-              <CtfCard key={ctf.id} ctf={ctf} animationDelay={i * 0.1} />
+              <ElectricBorder
+                key={ctf.id}
+                color="#00ffff"
+                speed={1.2}
+                chaos={1.5}
+                thickness={2}
+                style={{ borderRadius: 12 }}
+                className="relative z-10"
+              >
+                <CtfCard ctf={ctf} animationDelay={i * 0.1} />
+              </ElectricBorder>
             ))}
           </div>
         </div>
