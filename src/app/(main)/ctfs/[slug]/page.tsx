@@ -57,7 +57,7 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
       <section className="container mx-auto py-16 md:py-24 px-4">
         <h2 className="text-3xl font-bold mb-8 text-center">Challenges</h2>
         {Object.keys(challengesByCategory).length > 0 ? (
-          <Accordion type="multiple" className="w-full max-w-4xl mx-auto">
+          <Accordion type="single" collapsible className="w-full max-w-4xl mx-auto">
             {Object.entries(challengesByCategory).map(([category, challengesList]) => (
               <AccordionItem value={category} key={category}>
                 <AccordionTrigger className="text-2xl font-semibold">{category}</AccordionTrigger>
