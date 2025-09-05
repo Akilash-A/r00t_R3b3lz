@@ -191,10 +191,17 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
       
       newOrUpdatedMember = {
         id: (updatedMember as any)._id.toString(),
-        name: updatedMember.name,
-        social: updatedMember.social || {},
-        role: updatedMember.role,
-        avatarUrl: updatedMember.avatarUrl
+        name: String(updatedMember.name),
+        social: {
+          instagram: String(updatedMember.social?.instagram || ''),
+          twitter: String(updatedMember.social?.twitter || ''),
+          github: String(updatedMember.social?.github || ''),
+          linkedin: String(updatedMember.social?.linkedin || ''),
+          email: String(updatedMember.social?.email || ''),
+          website: String(updatedMember.social?.website || '')
+        },
+        role: String(updatedMember.role),
+        avatarUrl: String(updatedMember.avatarUrl)
       };
     } else {
       // Create new member
@@ -203,17 +210,27 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
       
       newOrUpdatedMember = {
         id: (savedMember as any)._id.toString(),
-        name: savedMember.name,
-        social: savedMember.social || {},
-        role: savedMember.role,
-        avatarUrl: savedMember.avatarUrl
+        name: String(savedMember.name),
+        social: {
+          instagram: String(savedMember.social?.instagram || ''),
+          twitter: String(savedMember.social?.twitter || ''),
+          github: String(savedMember.social?.github || ''),
+          linkedin: String(savedMember.social?.linkedin || ''),
+          email: String(savedMember.social?.email || ''),
+          website: String(savedMember.social?.website || '')
+        },
+        role: String(savedMember.role),
+        avatarUrl: String(savedMember.avatarUrl)
       };
     }
     
     revalidatePath('/admin-page/members');
     revalidatePath('/admin-page');
     revalidatePath('/members');
-    return { success: true, message: "Member saved successfully.", data: newOrUpdatedMember };
+    
+    // Ensure the returned data is completely serialized
+    const serializedMember = JSON.parse(JSON.stringify(newOrUpdatedMember));
+    return { success: true, message: "Member saved successfully.", data: serializedMember };
   } catch (error) {
     console.error('Error saving member:', error);
     return { success: false, message: "An error occurred while saving the member." };

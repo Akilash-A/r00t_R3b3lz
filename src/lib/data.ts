@@ -56,13 +56,27 @@ export async function getTeamMembersFromDB(): Promise<TeamMember[]> {
   try {
     await connectToDatabase();
     const members = await TeamMemberModel.find({}).sort({ createdAt: -1 }).lean();
-    return members.map((member: any) => ({
-      id: member._id.toString(),
-      name: member.name,
-      social: member.social || {},
-      role: member.role,
-      avatarUrl: member.avatarUrl
-    }));
+    
+    // Explicitly serialize to ensure no MongoDB methods remain
+    return JSON.parse(JSON.stringify(members.map((member: any) => {
+      // Ensure we only return plain objects with the expected structure
+      const socialData = member.social || {};
+      
+      return {
+        id: member._id.toString(),
+        name: String(member.name || ''),
+        social: {
+          instagram: String(socialData.instagram || ''),
+          twitter: String(socialData.twitter || ''),
+          github: String(socialData.github || ''),
+          linkedin: String(socialData.linkedin || ''),
+          email: String(socialData.email || ''),
+          website: String(socialData.website || '')
+        },
+        role: String(member.role || ''),
+        avatarUrl: String(member.avatarUrl || '/placeholder-avatar.svg')
+      };
+    })));
   } catch (error) {
     console.error('Error fetching team members from database:', error);
     return defaultTeamMembers;
