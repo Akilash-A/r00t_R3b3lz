@@ -27,6 +27,7 @@ export interface CubesProps {
   borderStyle?: string;
   faceColor?: string;
   shadow?: boolean | string;
+  autoAnimate?: boolean;
   rippleOnClick?: boolean;
   rippleColor?: string;
   rippleSpeed?: number;
@@ -43,6 +44,7 @@ const Cubes: React.FC<CubesProps> = ({
   borderStyle = '1px solid #fff',
   faceColor = '#060010',
   shadow = false,
+  autoAnimate = true,
   rippleOnClick = true,
   rippleColor = '#fff',
   rippleSpeed = 2
@@ -51,6 +53,9 @@ const Cubes: React.FC<CubesProps> = ({
   const rafRef = useRef<number | null>(null);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const userActiveRef = useRef(false);
+  const simPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const simTargetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const simRAFRef = useRef<number | null>(null);
 
   const colGap =
     typeof cellGap === 'number'
@@ -99,6 +104,27 @@ const Cubes: React.FC<CubesProps> = ({
     [radius, maxAngle, enterDur, leaveDur, easing]
   );
 
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      userActiveRef.current = true;
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+      const rect = sceneRef.current!.getBoundingClientRect();
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
+      const colCenter = (e.clientX - rect.left) / cellW;
+      const rowCenter = (e.clientY - rect.top) / cellH;
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => tiltAt(rowCenter, colCenter));
+
+      idleTimerRef.current = setTimeout(() => {
+        userActiveRef.current = false;
+      }, 1000);
+    },
+    [gridSize, tiltAt]
+  );
+
   const onPointerMove = useCallback(
     (e: PointerEvent) => {
       userActiveRef.current = true;
@@ -115,7 +141,7 @@ const Cubes: React.FC<CubesProps> = ({
 
       idleTimerRef.current = setTimeout(() => {
         userActiveRef.current = false;
-      }, 3000);
+      }, 1000); // Reduced from 3000 to 1000ms for quicker response
     },
     [gridSize, tiltAt]
   );
@@ -151,7 +177,7 @@ const Cubes: React.FC<CubesProps> = ({
 
       idleTimerRef.current = setTimeout(() => {
         userActiveRef.current = false;
-      }, 3000);
+      }, 1000); // Match the pointer timeout
     },
     [gridSize, tiltAt]
   );
@@ -221,10 +247,45 @@ const Cubes: React.FC<CubesProps> = ({
   );
 
   useEffect(() => {
+    if (!autoAnimate || !sceneRef.current) return;
+    simPosRef.current = {
+      x: Math.random() * gridSize,
+      y: Math.random() * gridSize
+    };
+    simTargetRef.current = {
+      x: Math.random() * gridSize,
+      y: Math.random() * gridSize
+    };
+    const speed = 0.005; // Reduced from 0.02 to make it slower and less intrusive
+    const loop = () => {
+      if (!userActiveRef.current) {
+        const pos = simPosRef.current;
+        const tgt = simTargetRef.current;
+        pos.x += (tgt.x - pos.x) * speed;
+        pos.y += (tgt.y - pos.y) * speed;
+        tiltAt(pos.y, pos.x);
+        if (Math.hypot(pos.x - tgt.x, pos.y - tgt.y) < 0.1) {
+          simTargetRef.current = {
+            x: Math.random() * gridSize,
+            y: Math.random() * gridSize
+          };
+        }
+      }
+      simRAFRef.current = requestAnimationFrame(loop);
+    };
+    simRAFRef.current = requestAnimationFrame(loop);
+    return () => {
+      if (simRAFRef.current != null) cancelAnimationFrame(simRAFRef.current);
+    };
+  }, [autoAnimate, gridSize, tiltAt]);
+
+  useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
+    el.addEventListener('mousemove', onMouseMove);
     el.addEventListener('pointermove', onPointerMove);
     el.addEventListener('pointerleave', resetAll);
+    el.addEventListener('mouseleave', resetAll);
     el.addEventListener('click', onClick);
 
     el.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -232,8 +293,10 @@ const Cubes: React.FC<CubesProps> = ({
     el.addEventListener('touchend', onTouchEnd, { passive: true });
 
     return () => {
+      el.removeEventListener('mousemove', onMouseMove);
       el.removeEventListener('pointermove', onPointerMove);
       el.removeEventListener('pointerleave', resetAll);
+      el.removeEventListener('mouseleave', resetAll);
       el.removeEventListener('click', onClick);
 
       el.removeEventListener('touchmove', onTouchMove);
@@ -243,7 +306,7 @@ const Cubes: React.FC<CubesProps> = ({
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     };
-  }, [onPointerMove, resetAll, onClick, onTouchMove, onTouchStart, onTouchEnd]);
+  }, [onMouseMove, onPointerMove, resetAll, onClick, onTouchMove, onTouchStart, onTouchEnd]);
 
   const cells = Array.from({ length: gridSize });
   const sceneStyle: React.CSSProperties = {
@@ -254,26 +317,31 @@ const Cubes: React.FC<CubesProps> = ({
     perspective: '99999999px',
     height: '100%'
   };
+  const gapSize = typeof cellGap === 'number' ? cellGap : 5;
   const wrapperStyle = {
     '--cube-face-border': borderStyle,
     '--cube-face-bg': faceColor,
     '--cube-face-shadow': shadow === true ? '0 0 6px rgba(0,0,0,.5)' : shadow || 'none',
     ...(cubeSize
       ? {
-          width: `${gridSize * cubeSize}px`,
-          height: `${gridSize * cubeSize}px`
+          width: `${gridSize * cubeSize + (gridSize - 1) * gapSize}px`,
+          height: `${gridSize * cubeSize + (gridSize - 1) * gapSize}px`
         }
-      : {})
+      : {
+          width: '100%',
+          height: '100%'
+        })
   } as React.CSSProperties;
 
   return (
-    <div className="relative w-full h-full" style={wrapperStyle}>
-      <div ref={sceneRef} className="grid w-full h-full" style={sceneStyle}>
+    <div className="relative w-full h-full" style={{...wrapperStyle, pointerEvents: 'auto'}}>
+      <div ref={sceneRef} className="grid w-full h-full" style={{...sceneStyle, pointerEvents: 'auto'}}>
         {cells.map((_, r) =>
           cells.map((__, c) => (
             <div
               key={`${r}-${c}`}
               className="cube relative w-full h-full min-h-0 [transform-style:preserve-3d]"
+              style={{ aspectRatio: '1' }}
               data-row={r}
               data-col={c}
             >

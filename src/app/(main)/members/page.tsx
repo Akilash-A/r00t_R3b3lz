@@ -1,5 +1,6 @@
 import { getTeamMembersFromDB } from '@/lib/data';
 import { MemberCard } from '@/components/member-card';
+import Cubes from '@/components/Cubes';
 
 // Add metadata for better SEO and performance
 export const metadata = {
@@ -10,15 +11,41 @@ export const metadata = {
 export default async function MembersPage() {
   const teamMembers = await getTeamMembersFromDB();
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#060010' }}>
-      <div className="container mx-auto py-16 md:py-24 px-4 pt-32">
-        <div className="text-center mb-16">
+    <div className="min-h-screen relative" style={{ backgroundColor: '#060010' }}>
+      {/* Background Cubes */}
+      <div style={{ 
+        position: 'fixed', 
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 0,
+        pointerEvents: 'auto'
+      }}>
+        <Cubes 
+          gridSize={24}
+          cubeSize={40}
+          maxAngle={38}
+          radius={4}
+          cellGap={40}
+          borderStyle="2px dashed #b19eef"
+          faceColor="#070010"
+          rippleColor="#ffffffff"
+          rippleSpeed={1.5}
+          autoAnimate={true}
+          rippleOnClick={true}
+        />
+      </div>
+      
+      {/* Content */}
+      <div className="relative container mx-auto py-16 md:py-24 px-4 pt-32" style={{ zIndex: 10, pointerEvents: 'none' }}>
+        <div className="text-center mb-16 bg-black/40 backdrop-blur-sm rounded-lg p-8" style={{ pointerEvents: 'auto' }}>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the Team</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             The minds behind the hacks. A collective of passionate security researchers and CTF enthusiasts.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" style={{ pointerEvents: 'auto' }}>
           {teamMembers.map((member) => (
             <MemberCard key={member.id} member={member} />
           ))}
