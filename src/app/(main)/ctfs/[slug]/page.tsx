@@ -59,7 +59,8 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
         {/* Background Cubes Animation - Only in content area */}
         <div className="absolute inset-0 z-0">
           <CubesBackground 
-            gridSize={15}
+            gridSize={25}
+            cellGap={35}
             maxAngle={60}
             radius={4}
             borderStyle="2px dashed #b19eef"
