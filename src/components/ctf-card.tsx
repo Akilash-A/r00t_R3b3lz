@@ -11,6 +11,7 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
       <Card 
         className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-primary/20 hover:border-primary/50 hover:-translate-y-2 animate-fade-in-up bg-card/80 backdrop-blur-sm"
         style={{ animationDelay: `${animationDelay}s` }}
+        suppressHydrationWarning
       >
         <div className="relative h-48 w-full overflow-hidden">
           <Image
@@ -19,6 +20,7 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
             fill
             className="object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
             data-ai-hint="cybersecurity abstract"
+            suppressHydrationWarning
           />
            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
         </div>
@@ -29,7 +31,7 @@ export function CtfCard({ ctf, animationDelay = 0 }: { ctf: Ctf, animationDelay?
         <CardContent>
           <div className="flex items-center text-sm font-medium text-primary">
             View Write-ups
-            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" suppressHydrationWarning />
           </div>
         </CardContent>
       </Card>

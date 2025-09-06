@@ -8,9 +8,10 @@ export function Header() {
         <div 
           className="flex items-center justify-between w-full max-w-4xl px-8 py-5 bg-black/5 backdrop-blur-2xl rounded-full border"
           style={{ borderColor: 'rgb(54, 63, 81)' }}
+          suppressHydrationWarning
         >
           <Link href="/" className="flex items-center gap-2 group" prefetch={true}>
-            <Terminal className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-12" />
+            <Terminal className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-12" suppressHydrationWarning />
             <span className="text-lg font-bold font-code text-white">
               r00t<span className="text-primary group-hover:glow transition-shadow duration-300">_</span>R3b3lz
             </span>

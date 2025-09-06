@@ -141,12 +141,13 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   };
 
   return (
-    <div ref={rootRef} className={'relative ' + (className ?? '')} style={style}>
+    <div ref={rootRef} className={'relative ' + (className ?? '')} style={style} suppressHydrationWarning>
       <svg
         ref={svgRef}
         className="fixed -left-[10000px] -top-[10000px] w-[10px] h-[10px] opacity-[0.001] pointer-events-none"
         aria-hidden
         focusable="false"
+        suppressHydrationWarning
       >
         <defs>
           <filter id={filterId} colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
@@ -184,15 +185,15 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
         </defs>
       </svg>
 
-      <div className="relative" style={inheritRadius}>
+      <div className="relative" style={inheritRadius} suppressHydrationWarning>
         {children}
       </div>
 
-      <div className="absolute inset-0 pointer-events-none z-50" style={inheritRadius}>
-        <div ref={strokeRef} className="absolute inset-0 box-border" style={strokeStyle} />
-        <div className="absolute inset-0 box-border" style={glow1Style} />
-        <div className="absolute inset-0 box-border" style={glow2Style} />
-        <div className="absolute inset-0" style={bgGlowStyle} />
+      <div className="absolute inset-0 pointer-events-none z-50" style={inheritRadius} suppressHydrationWarning>
+        <div ref={strokeRef} className="absolute inset-0 box-border" style={strokeStyle} suppressHydrationWarning />
+        <div className="absolute inset-0 box-border" style={glow1Style} suppressHydrationWarning />
+        <div className="absolute inset-0 box-border" style={glow2Style} suppressHydrationWarning />
+        <div className="absolute inset-0" style={bgGlowStyle} suppressHydrationWarning />
       </div>
     </div>
   );

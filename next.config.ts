@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   reactStrictMode: true,
+  // Suppress hydration warnings in development when browser extensions are common
+  ...(process.env.NODE_ENV === 'development' && {
+    onDemandEntries: {
+      maxInactiveAge: 25 * 1000,
+      pagesBufferLength: 2,
+    },
+  }),
   images: {
     formats: ['image/webp', 'image/avif'],
     remotePatterns: [
