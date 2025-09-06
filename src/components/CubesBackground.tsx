@@ -5,9 +5,13 @@ import { CubesProps } from './Cubes';
 
 const Cubes = dynamic(() => import('./Cubes'), {
   ssr: false,
-  loading: () => <div className="relative w-1/2 max-md:w-11/12 aspect-square bg-transparent" />
+  loading: () => <div className="w-full h-full bg-transparent" />
 });
 
 export default function CubesBackground(props: CubesProps) {
-  return <Cubes {...props} />;
+  return (
+    <div className="w-full h-full">
+      <Cubes {...props} />
+    </div>
+  );
 }
