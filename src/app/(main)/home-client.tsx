@@ -29,7 +29,7 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ ctfs }: HomePageClientProps) {
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: '#0a0614' }} suppressHydrationWarning>
+    <div className="relative min-h-screen" style={{ backgroundColor: '#060010' }} suppressHydrationWarning>
       {/* Full screen DotGrid background */}
       <div style={{ 
         position: 'fixed', 

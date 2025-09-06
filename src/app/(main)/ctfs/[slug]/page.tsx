@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
+import PixelBlastBackground from '@/components/PixelBlastBackground';
 
 export default async function CtfPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -37,17 +38,22 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
   }, {} as Record<string, Challenge[]>);
 
   return (
-    <div>
-      <section className="relative h-64 md:h-80 w-full">
-        <Image
-          src={ctf.bannerUrl}
-          alt={`${ctf.name} banner`}
-          fill
-          className="object-cover"
-          data-ai-hint="cybersecurity abstract"
-          priority
-        />
-        <div className="absolute inset-0 bg-black/60" />
+    <div className="relative min-h-screen" style={{ backgroundColor: '#060010' }}>
+      {/* PixelBlast Background */}
+      <PixelBlastBackground />
+      
+      {/* Content with relative positioning to appear above background */}
+      <div className="relative z-10">
+        <section className="relative h-64 md:h-80 w-full">
+          <Image
+            src={ctf.bannerUrl}
+            alt={`${ctf.name} banner`}
+            fill
+            className="object-cover"
+            data-ai-hint="cybersecurity abstract"
+            priority
+          />
+          <div className="absolute inset-0 bg-black/60" />
         <div className="relative container mx-auto h-full flex flex-col justify-center text-white px-4">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight">{ctf.name}</h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl">{ctf.description}</p>
@@ -118,6 +124,7 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
             </div>
           </div>
       </section>
+      </div>
     </div>
   );
 }
