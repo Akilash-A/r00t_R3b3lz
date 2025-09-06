@@ -27,7 +27,6 @@ export interface CubesProps {
   borderStyle?: string;
   faceColor?: string;
   shadow?: boolean | string;
-  autoAnimate?: boolean;
   rippleOnClick?: boolean;
   rippleColor?: string;
   rippleSpeed?: number;
@@ -44,7 +43,6 @@ const Cubes: React.FC<CubesProps> = ({
   borderStyle = '1px solid #fff',
   faceColor = '#060010',
   shadow = false,
-  autoAnimate = true,
   rippleOnClick = true,
   rippleColor = '#fff',
   rippleSpeed = 2
@@ -53,9 +51,6 @@ const Cubes: React.FC<CubesProps> = ({
   const rafRef = useRef<number | null>(null);
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const userActiveRef = useRef(false);
-  const simPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const simTargetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const simRAFRef = useRef<number | null>(null);
 
   const colGap =
     typeof cellGap === 'number'
@@ -110,24 +105,13 @@ const Cubes: React.FC<CubesProps> = ({
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
 
       const rect = sceneRef.current!.getBoundingClientRect();
-      const relativeX = e.clientX - rect.left;
-      const relativeY = e.clientY - rect.top;
-      
-      // Ensure we're within bounds
-      if (relativeX < 0 || relativeX > rect.width || relativeY < 0 || relativeY > rect.height) {
-        return;
-      }
-      
-      // Calculate exact grid position as floating point
-      const colCenter = (relativeX / rect.width) * gridSize;
-      const rowCenter = (relativeY / rect.height) * gridSize;
-
-      // Clamp to grid bounds
-      const clampedRowCenter = Math.max(0, Math.min(gridSize - 0.1, rowCenter));
-      const clampedColCenter = Math.max(0, Math.min(gridSize - 0.1, colCenter));
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
+      const colCenter = (e.clientX - rect.left) / cellW;
+      const rowCenter = (e.clientY - rect.top) / cellH;
 
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => tiltAt(clampedRowCenter, clampedColCenter));
+      rafRef.current = requestAnimationFrame(() => tiltAt(rowCenter, colCenter));
 
       idleTimerRef.current = setTimeout(() => {
         userActiveRef.current = false;
@@ -155,25 +139,15 @@ const Cubes: React.FC<CubesProps> = ({
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
 
       const rect = sceneRef.current!.getBoundingClientRect();
-      const touch = e.touches[0];
-      const relativeX = touch.clientX - rect.left;
-      const relativeY = touch.clientY - rect.top;
-      
-      // Ensure we're within bounds
-      if (relativeX < 0 || relativeX > rect.width || relativeY < 0 || relativeY > rect.height) {
-        return;
-      }
-      
-      // Calculate exact grid position as floating point
-      const colCenter = (relativeX / rect.width) * gridSize;
-      const rowCenter = (relativeY / rect.height) * gridSize;
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
 
-      // Clamp to grid bounds
-      const clampedRowCenter = Math.max(0, Math.min(gridSize - 0.1, rowCenter));
-      const clampedColCenter = Math.max(0, Math.min(gridSize - 0.1, colCenter));
+      const touch = e.touches[0];
+      const colCenter = (touch.clientX - rect.left) / cellW;
+      const rowCenter = (touch.clientY - rect.top) / cellH;
 
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => tiltAt(clampedRowCenter, clampedColCenter));
+      rafRef.current = requestAnimationFrame(() => tiltAt(rowCenter, colCenter));
 
       idleTimerRef.current = setTimeout(() => {
         userActiveRef.current = false;
@@ -195,25 +169,14 @@ const Cubes: React.FC<CubesProps> = ({
     (e: MouseEvent | TouchEvent) => {
       if (!rippleOnClick || !sceneRef.current) return;
       const rect = sceneRef.current.getBoundingClientRect();
+      const cellW = rect.width / gridSize;
+      const cellH = rect.height / gridSize;
 
       const clientX = (e as MouseEvent).clientX || ((e as TouchEvent).touches && (e as TouchEvent).touches[0].clientX);
       const clientY = (e as MouseEvent).clientY || ((e as TouchEvent).touches && (e as TouchEvent).touches[0].clientY);
 
-      const relativeX = clientX - rect.left;
-      const relativeY = clientY - rect.top;
-      
-      // Ensure we're within bounds
-      if (relativeX < 0 || relativeX > rect.width || relativeY < 0 || relativeY > rect.height) {
-        return;
-      }
-      
-      // Calculate exact grid position
-      const colHit = Math.floor((relativeX / rect.width) * gridSize);
-      const rowHit = Math.floor((relativeY / rect.height) * gridSize);
-
-      // Clamp to grid bounds
-      const clampedRowHit = Math.max(0, Math.min(gridSize - 1, rowHit));
-      const clampedColHit = Math.max(0, Math.min(gridSize - 1, colHit));
+      const colHit = Math.floor((clientX - rect.left) / cellW);
+      const rowHit = Math.floor((clientY - rect.top) / cellH);
 
       const baseRingDelay = 0.15;
       const baseAnimDur = 0.3;
@@ -227,7 +190,7 @@ const Cubes: React.FC<CubesProps> = ({
       sceneRef.current.querySelectorAll<HTMLDivElement>('.cube').forEach(cube => {
         const r = +cube.dataset.row!;
         const c = +cube.dataset.col!;
-        const dist = Math.hypot(r - clampedRowHit, c - clampedColHit);
+        const dist = Math.hypot(r - rowHit, c - colHit);
         const ring = Math.round(dist);
         if (!rings[ring]) rings[ring] = [];
         rings[ring].push(cube);
@@ -258,39 +221,6 @@ const Cubes: React.FC<CubesProps> = ({
   );
 
   useEffect(() => {
-    if (!autoAnimate || !sceneRef.current) return;
-    simPosRef.current = {
-      x: Math.random() * gridSize,
-      y: Math.random() * gridSize
-    };
-    simTargetRef.current = {
-      x: Math.random() * gridSize,
-      y: Math.random() * gridSize
-    };
-    const speed = 0.02;
-    const loop = () => {
-      if (!userActiveRef.current) {
-        const pos = simPosRef.current;
-        const tgt = simTargetRef.current;
-        pos.x += (tgt.x - pos.x) * speed;
-        pos.y += (tgt.y - pos.y) * speed;
-        tiltAt(pos.y, pos.x);
-        if (Math.hypot(pos.x - tgt.x, pos.y - tgt.y) < 0.1) {
-          simTargetRef.current = {
-            x: Math.random() * gridSize,
-            y: Math.random() * gridSize
-          };
-        }
-      }
-      simRAFRef.current = requestAnimationFrame(loop);
-    };
-    simRAFRef.current = requestAnimationFrame(loop);
-    return () => {
-      if (simRAFRef.current != null) cancelAnimationFrame(simRAFRef.current);
-    };
-  }, [autoAnimate, gridSize, tiltAt]);
-
-  useEffect(() => {
     const el = sceneRef.current;
     if (!el) return;
     el.addEventListener('pointermove', onPointerMove);
@@ -318,11 +248,11 @@ const Cubes: React.FC<CubesProps> = ({
   const cells = Array.from({ length: gridSize });
   const sceneStyle: React.CSSProperties = {
     gridTemplateColumns: cubeSize ? `repeat(${gridSize}, ${cubeSize}px)` : `repeat(${gridSize}, 1fr)`,
-    gridTemplateRows: cubeSize ? `repeat(${gridSize}, ${cubeSize}px)` : `repeat(${gridSize}, 1fr)`,
+    gridTemplateRows: cubeSize ? `repeat(${gridSize}, ${cubeSize}px)` : `repeat(${gridSize}, minmax(0, 1fr))`,
     columnGap: colGap,
     rowGap: rowGap,
     perspective: '99999999px',
-    gridAutoRows: '1fr'
+    height: '100%'
   };
   const wrapperStyle = {
     '--cube-face-border': borderStyle,
@@ -343,7 +273,7 @@ const Cubes: React.FC<CubesProps> = ({
           cells.map((__, c) => (
             <div
               key={`${r}-${c}`}
-              className="cube relative w-full h-full aspect-square [transform-style:preserve-3d]"
+              className="cube relative w-full h-full min-h-0 [transform-style:preserve-3d]"
               data-row={r}
               data-col={c}
             >

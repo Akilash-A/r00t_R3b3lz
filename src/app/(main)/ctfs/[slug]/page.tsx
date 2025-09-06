@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
-import CubesBackground from '@/components/CubesBackground';
 
 export default async function CtfPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -55,29 +54,11 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
         </div>
       </section>
 
-      <section className="relative py-8 md:py-12 min-h-[60vh] overflow-hidden">
-        {/* Background Cubes Animation - Constrained to section height */}
-        <div className="absolute inset-0 z-0 pointer-events-auto">
-          <div className="w-full h-full">
-            <CubesBackground 
-              gridSize={25}
-              cellGap={30}
-              maxAngle={80}
-              radius={3}
-              borderStyle="2px dashed #b19eef"
-              faceColor="#1a1a2e"
-              rippleColor="#b19eff88"
-              rippleSpeed={2}
-              autoAnimate={true}
-              rippleOnClick={true}
-            />
-          </div>
-        </div>
-        
-        <div className="container mx-auto px-4 h-full pointer-events-none">
-          <div className="relative z-10 bg-background/30 backdrop-blur-sm rounded-lg p-8 max-h-[70vh] overflow-y-auto max-w-6xl mx-auto border border-white/10 pointer-events-auto">
-            <h2 className="text-3xl font-bold mb-8 text-center text-white">Challenges</h2>
-            {Object.keys(challengesByCategory).length > 0 ? (
+      <section className="py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <div className="bg-background/30 backdrop-blur-sm p-8 max-h-[70vh] overflow-y-auto max-w-6xl mx-auto border border-white/10" style={{ borderRadius: '20px' }}>
+              <h2 className="text-3xl font-bold mb-8 text-center text-white">Challenges</h2>
+              {Object.keys(challengesByCategory).length > 0 ? (
               <Accordion type="single" collapsible className="w-full mx-auto">
                 {Object.entries(challengesByCategory).map(([category, challengesList]) => (
                   <AccordionItem value={category} key={category}>
@@ -134,8 +115,8 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
             ) : (
               <p className="text-center text-muted-foreground">Write-ups for this CTF are coming soon!</p>
             )}
+            </div>
           </div>
-        </div>
       </section>
     </div>
   );
