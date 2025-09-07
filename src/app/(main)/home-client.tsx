@@ -65,7 +65,7 @@ export default function HomePageClient({ ctfs }: HomePageClientProps) {
         </div>
       </section>
 
-      <section className="py-16 md:py-24 relative z-10">
+      <section id="ctf-writeups" className="py-16 md:py-24 relative z-10">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-2 text-white">
             <Sparkles className="text-primary" suppressHydrationWarning />

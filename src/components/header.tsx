@@ -26,18 +26,18 @@ export function Header() {
               Home
             </Link>
             <Link
+              href="/#ctf-writeups"
+              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
+              prefetch={true}
+            >
+              CTF-Writeups
+            </Link>
+            <Link
               href="/members"
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
               Members
-            </Link>
-            <Link
-              href="/login"
-              className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
-              prefetch={true}
-            >
-              Login
             </Link>
           </nav>
         </div>
