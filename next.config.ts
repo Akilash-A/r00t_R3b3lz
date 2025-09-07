@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   reactStrictMode: true,
+  // Allow cross-origin requests from external IPs
+  allowedDevOrigins: ['34.14.201.98'],
   // Suppress hydration warnings in development when browser extensions are common
   ...(process.env.NODE_ENV === 'development' && {
     onDemandEntries: {

@@ -82,14 +82,14 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
                                 <Button variant="outline"><FileText className="mr-2 h-4 w-4" />View Write-up</Button>
                               </DialogTrigger>
                             </div>
-                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                                        <DialogContent className="dialog-writeup">
                                <DialogHeader>
                                  <DialogTitle className="text-2xl">{challenge.title}</DialogTitle>
                                  <DialogDescription>
                                   From {ctf.name} - {challenge.category}
                                  </DialogDescription>
                                </DialogHeader>
-                               <div className="space-y-6">
+                               <div className="dialog-content-inner space-y-6">
                                  {/* Challenge Image - Display first if available */}
                                  {challenge.imageUrl && (
                                    <div className="relative w-full h-64 md:h-80 rounded-lg overflow-hidden border border-border">
@@ -104,10 +104,84 @@ export default async function CtfPage({ params }: { params: Promise<{ slug: stri
                                  )}
                                  
                                  {/* Markdown Content */}
-                                 <div className="prose prose-invert dark:prose-invert prose-headings:text-foreground prose-headings:mb-2 prose-headings:mt-4 prose-p:text-muted-foreground prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ul:my-2 prose-li:text-muted-foreground prose-li:my-0 prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground max-w-none">
-                                   <ReactMarkdown>
-                                     {challenge.writeup || "No writeup content available."}
-                                   </ReactMarkdown>
+                                 <div className="writeup-content prose prose-invert dark:prose-invert prose-headings:text-foreground prose-headings:mb-2 prose-headings:mt-4 prose-p:text-muted-foreground prose-p:my-2 prose-p:leading-relaxed prose-a:text-primary prose-strong:text-foreground prose-ul:text-muted-foreground prose-ul:my-2 prose-li:text-muted-foreground prose-li:my-0 prose-code:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground max-w-none">
+                                   <div className="w-full overflow-hidden">
+                                     <ReactMarkdown
+                                       components={{
+                                         pre: ({ children, ...props }) => (
+                                           <pre 
+                                             {...props} 
+                                             className="bg-muted border border-border rounded-md p-3 overflow-x-auto max-w-full whitespace-pre-wrap break-words"
+                                           >
+                                             {children}
+                                           </pre>
+                                         ),
+                                         code: ({ children, className, ...props }) => {
+                                           const isInline = !className;
+                                           return isInline ? (
+                                             <code 
+                                               {...props} 
+                                               className="text-foreground bg-muted px-1 py-0.5 rounded text-sm break-words"
+                                             >
+                                               {children}
+                                             </code>
+                                           ) : (
+                                             <code 
+                                               {...props} 
+                                               className="text-foreground text-sm whitespace-pre-wrap break-words block"
+                                             >
+                                               {children}
+                                             </code>
+                                           );
+                                         },
+                                         p: ({ children, ...props }) => (
+                                           <p {...props} className="text-muted-foreground my-2 leading-relaxed break-words overflow-wrap-anywhere">
+                                             {children}
+                                           </p>
+                                         ),
+                                         div: ({ children, ...props }) => (
+                                           <div {...props} className="break-words overflow-wrap-anywhere">
+                                             {children}
+                                           </div>
+                                         ),
+                                         table: ({ children, ...props }) => (
+                                           <div className="overflow-x-auto">
+                                             <table {...props} className="min-w-full border-collapse border border-border">
+                                               {children}
+                                             </table>
+                                           </div>
+                                         ),
+                                         th: ({ children, ...props }) => (
+                                           <th {...props} className="border border-border px-2 py-1 bg-muted text-foreground font-semibold text-left">
+                                             {children}
+                                           </th>
+                                         ),
+                                         td: ({ children, ...props }) => (
+                                           <td {...props} className="border border-border px-2 py-1 text-muted-foreground break-words">
+                                             {children}
+                                           </td>
+                                         ),
+                                         img: ({ src, alt, ...props }) => (
+                                           <div className="my-4">
+                                             <img 
+                                               {...props}
+                                               src={src}
+                                               alt={alt}
+                                               className="max-w-full h-auto rounded border border-border"
+                                               loading="lazy"
+                                             />
+                                           </div>
+                                         ),
+                                         blockquote: ({ children, ...props }) => (
+                                           <blockquote {...props} className="border-l-4 border-primary pl-4 my-4 italic text-muted-foreground break-words">
+                                             {children}
+                                           </blockquote>
+                                         )
+                                       }}
+                                     >
+                                       {challenge.writeup || "No writeup content available."}
+                                     </ReactMarkdown>
+                                   </div>
                                  </div>
                                </div>
                              </DialogContent>
