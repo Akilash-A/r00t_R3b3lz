@@ -8,12 +8,12 @@ import Link from 'next/link';
 import React, { useRef, useCallback, useEffect } from 'react';
 
 const socialIcons = {
-  instagram: { icon: Instagram, color: 'text-pink-500 hover:text-pink-600' },
-  twitter: { icon: Twitter, color: 'text-blue-400 hover:text-blue-500' },
-  github: { icon: Github, color: 'text-gray-400 hover:text-gray-300' },
-  linkedin: { icon: Linkedin, color: 'text-blue-600 hover:text-blue-700' },
-  email: { icon: Mail, color: 'text-red-500 hover:text-red-600' },
-  website: { icon: Globe, color: 'text-green-500 hover:text-green-600' },
+  instagram: { icon: Instagram, color: 'text-white hover:text-gray-200' },
+  twitter: { icon: Twitter, color: 'text-white hover:text-gray-200' },
+  github: { icon: Github, color: 'text-white hover:text-gray-200' },
+  linkedin: { icon: Linkedin, color: 'text-white hover:text-gray-200' },
+  email: { icon: Mail, color: 'text-white hover:text-gray-200' },
+  website: { icon: Globe, color: 'text-white hover:text-gray-200' },
 };
 
 const clamp = (value: number, min = 0, max = 100): number => Math.min(Math.max(value, min), max);
