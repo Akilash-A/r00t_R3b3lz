@@ -48,6 +48,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
     wrap.style.setProperty('--rotate-x', `${rotateX}deg`);
     wrap.style.setProperty('--rotate-y', `${rotateY}deg`);
     wrap.style.setProperty('--pointer-from-center', `${clamp(Math.hypot(percentY - 50, percentX - 50) / 50, 0, 1)}`);
+    wrap.style.setProperty('--card-opacity', '1');
   }, []);
 
   const handlePointerMove = useCallback((event: React.PointerEvent) => {
@@ -89,6 +90,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
     wrap.style.setProperty('--pointer-x', '50%');
     wrap.style.setProperty('--pointer-y', '50%');
     wrap.style.setProperty('--pointer-from-center', '0');
+    wrap.style.setProperty('--card-opacity', '0');
   }, []);
 
   useEffect(() => {
@@ -101,6 +103,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
     wrap.style.setProperty('--rotate-x', '0deg');
     wrap.style.setProperty('--rotate-y', '0deg');
     wrap.style.setProperty('--pointer-from-center', '0');
+    wrap.style.setProperty('--card-opacity', '0');
   }, []);
   
   return (
@@ -114,38 +117,72 @@ export function MemberCard({ member }: { member: TeamMember }) {
     >
       <Card 
         ref={cardRef}
-        className="text-center transition-all duration-300 hover:-translate-y-2 group relative overflow-visible border-transparent h-80 transform-gpu"
+        className="text-center transition-all duration-300 hover:-translate-y-2 group relative border-transparent h-80 transform-gpu rounded-[25px]"
         style={{
           transform: 'translate3d(0, 0, 0.1px) rotateX(var(--rotate-y, 0deg)) rotateY(var(--rotate-x, 0deg))',
           transition: 'transform 0.6s ease',
-          boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 10px) - 3px) calc((var(--pointer-from-center, 0) * 20px) - 6px) 20px -5px'
+          boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 10px) - 3px) calc((var(--pointer-from-center, 0) * 20px) - 6px) 20px -5px',
+          backgroundImage: `
+            radial-gradient(
+              farthest-side circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
+              hsla(266, 100%, 90%, var(--card-opacity, 0)) 4%,
+              hsla(266, 50%, 80%, calc(var(--card-opacity, 0) * 0.75)) 10%,
+              hsla(266, 25%, 70%, calc(var(--card-opacity, 0) * 0.5)) 50%,
+              hsla(266, 0%, 60%, 0) 100%
+            ),
+            radial-gradient(35% 52% at 55% 20%, #00ffaac4 0%, #073aff00 100%),
+            radial-gradient(100% 100% at 50% 50%, #00c1ffff 1%, #073aff00 76%),
+            conic-gradient(from 124deg at 50% 50%, #c137ffff 0%, #07c6ffff 40%, #07c6ffff 60%, #c137ffff 100%)
+          `,
+          backgroundSize: '100% 100%',
+          backgroundPosition: '0 0, 0 0, 50% 50%, 0 0',
+          backgroundBlendMode: 'color-dodge, normal, normal, normal',
+          overflow: 'visible'
         }}
         onPointerMove={handlePointerMove}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
       >
-        {/* Outer glow effect */}
+        {/* Outer glow effect - positioned outside card */}
         <div 
-          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -m-1"
+          className="absolute -inset-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[27px] pointer-events-none"
           style={{
-            background: `radial-gradient(farthest-side circle at var(--pointer-x, 50%) var(--pointer-y, 50%), hsla(266, 100%, 90%, var(--pointer-from-center, 0)) 4%, hsla(266, 50%, 80%, calc(var(--pointer-from-center, 0) * 0.75)) 10%, hsla(266, 25%, 70%, calc(var(--pointer-from-center, 0) * 0.5)) 50%, hsla(266, 0%, 60%, 0) 100%)`
+            background: `radial-gradient(farthest-side circle at var(--pointer-x, 50%) var(--pointer-y, 50%), hsla(266, 100%, 90%, var(--pointer-from-center, 0)) 4%, hsla(266, 50%, 80%, calc(var(--pointer-from-center, 0) * 0.75)) 10%, hsla(266, 25%, 70%, calc(var(--pointer-from-center, 0) * 0.5)) 50%, hsla(266, 0%, 60%, 0) 100%)`,
+            zIndex: -1
           }}
         >
-          <div className="absolute inset-0 rounded-[25px] bg-gradient-to-r from-blue-500/20 via-cyan-400/30 to-blue-500/20 blur-sm"></div>
-          <div className="absolute inset-0 rounded-[25px] bg-gradient-to-r from-blue-400/40 via-cyan-300/50 to-blue-400/40 blur-md"></div>
-          <div className="absolute inset-0 rounded-[25px] bg-gradient-to-r from-blue-300/20 via-cyan-200/30 to-blue-300/20 blur-lg"></div>
+          <div className="absolute inset-0 rounded-[27px] bg-gradient-to-r from-blue-500/20 via-cyan-400/30 to-blue-500/20 blur-sm"></div>
+          <div className="absolute inset-0 rounded-[27px] bg-gradient-to-r from-blue-400/40 via-cyan-300/50 to-blue-400/40 blur-md"></div>
+          <div className="absolute inset-0 rounded-[27px] bg-gradient-to-r from-blue-300/20 via-cyan-200/30 to-blue-300/20 blur-lg"></div>
         </div>
       
-      {/* Card border glow */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="absolute inset-0 rounded-[25px] border-2 border-blue-400/80 shadow-[0_0_25px_rgba(59,130,246,0.8),0_0_50px_rgba(59,130,246,0.4),0_0_75px_rgba(59,130,246,0.2)]"></div>
-      </div>
+      {/* Card border - always visible */}
+      <div 
+        className="absolute inset-0 rounded-[25px] pointer-events-none"
+        style={{
+          border: '2px solid transparent',
+          background: 'linear-gradient(45deg, rgba(59,130,246,0.3), rgba(168,85,247,0.3), rgba(59,130,246,0.3)) border-box',
+          mask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+          maskComposite: 'xor',
+          WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor'
+        }}
+      />
+      
+      {/* Enhanced border glow on hover */}
+      <div 
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[25px] pointer-events-none"
+        style={{
+          border: '2px solid rgba(59,130,246,0.8)',
+          boxShadow: '0 0 25px rgba(59,130,246,0.8), 0 0 50px rgba(59,130,246,0.4), 0 0 75px rgba(59,130,246,0.2), inset 0 0 25px rgba(59,130,246,0.2)'
+        }}
+      />
       
       {/* Card content with subtle background */}
-      <div className="relative z-10 rounded-[25px] bg-gradient-to-br from-slate-900/95 to-slate-800/95 group-hover:from-blue-950/90 group-hover:to-slate-900/90 transition-all duration-500 backdrop-blur-sm h-full border border-slate-700/50 group-hover:border-blue-400/30">
+      <div className="relative z-10 rounded-[25px] bg-gradient-to-br from-slate-900/80 to-slate-800/90 group-hover:from-blue-950/75 group-hover:to-slate-900/85 transition-all duration-500 backdrop-blur-sm h-full border border-slate-700/50 group-hover:border-blue-400/30 overflow-hidden m-[2px]">
         <CardContent className="pt-8 h-full flex flex-col justify-center relative">
           {/* Inner background overlay */}
-          <div className="absolute inset-1 rounded-[23px] bg-gradient-to-br from-slate-800/60 to-slate-900/80 group-hover:from-blue-900/40 group-hover:to-slate-800/60 transition-all duration-500"></div>
+          <div className="absolute inset-1 rounded-[23px] bg-gradient-to-br from-slate-800/40 to-slate-900/60 group-hover:from-blue-900/30 group-hover:to-slate-800/50 transition-all duration-500"></div>
           
           <div className="relative z-10">
             <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary ring-4 ring-primary/20 transition-all duration-300 group-hover:ring-blue-400/60 group-hover:border-blue-400/80 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]">
