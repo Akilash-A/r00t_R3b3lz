@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Terminal, LogIn, AlertCircle } from 'lucide-react';
-import { Header } from '@/components/header';
+import Header from '@/components/header';
 import { Footer } from '@/components/footer';
 
 // Simplified DotGrid component for login page
