@@ -15,8 +15,8 @@ export default async function MembersPage() {
       {/* Background Cubes */}
       <div style={{ 
         position: 'fixed', 
-        top: 0,
-        left: 0,
+        top: '10px',
+        left: '10px',
         right: 0,
         bottom: 0,
         zIndex: 0,
@@ -38,7 +38,7 @@ export default async function MembersPage() {
       </div>
       
       {/* Content */}
-      <div className="relative container mx-auto py-16 md:py-24 px-4 pt-64" style={{ zIndex: 10, pointerEvents: 'none' }}>
+      <div className="relative container mx-auto py-16 md:py-24 px-4 pt-28 md:pt-32" style={{ zIndex: 10, pointerEvents: 'none' }}>
         <div className="text-center mb-16 bg-black/40 backdrop-blur-sm p-6 max-w-3xl mx-auto" style={{ pointerEvents: 'auto', borderRadius: '20px' }}>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the Team</h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
