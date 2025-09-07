@@ -58,6 +58,11 @@ export default function Header() {
       behavior: 'smooth'
     });
   };
+
+  const handleMembersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    router.push('/members');
+  };
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6">
       <div className="flex justify-center">
@@ -92,6 +97,7 @@ export default function Header() {
             </Link>
             <Link
               href="/members"
+              onClick={handleMembersClick}
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
