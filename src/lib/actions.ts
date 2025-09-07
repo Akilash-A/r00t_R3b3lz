@@ -17,13 +17,31 @@ async function deleteUploadedImage(imageUrl: string) {
   if (!imageUrl) return;
   
   try {
-    // Extract filename from URL if it's a local upload
-    const url = new URL(imageUrl);
-    if (url.pathname.startsWith('/uploads/')) {
-      const filename = url.pathname.split('/uploads/')[1];
-      await fetch(`${url.origin}/api/upload/delete?filename=${filename}`, {
+    // Check if it's a local upload path
+    if (imageUrl.startsWith('/uploads/')) {
+      const filename = imageUrl.split('/uploads/')[1];
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload/delete?filename=${filename}`, {
         method: 'DELETE'
       });
+    } else {
+      // Handle full URLs
+      try {
+        const url = new URL(imageUrl);
+        if (url.pathname.startsWith('/uploads/')) {
+          const filename = url.pathname.split('/uploads/')[1];
+          await fetch(`${url.origin}/api/upload/delete?filename=${filename}`, {
+            method: 'DELETE'
+          });
+        }
+      } catch (urlError) {
+        // If URL parsing fails, it might be a relative path, try direct filename extraction
+        if (imageUrl.includes('/uploads/')) {
+          const filename = imageUrl.split('/uploads/')[1];
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload/delete?filename=${filename}`, {
+            method: 'DELETE'
+          });
+        }
+      }
     }
   } catch (error) {
     console.error('Error deleting uploaded image:', error);
