@@ -1,7 +1,63 @@
+'use client';
+
 import Link from 'next/link';
 import { Terminal } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
-export function Header() {
+export default function Header() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Handle hash scrolling after navigation
+  useEffect(() => {
+    if (pathname === '/' && window.location.hash === '#ctf-writeups') {
+      setTimeout(() => {
+        const element = document.getElementById('ctf-writeups');
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+      }, 100);
+    }
+  }, [pathname]);
+
+  const handleCtfWriteupsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    // If we're not on the home page, navigate to home first
+    if (pathname !== '/') {
+      router.push('/#ctf-writeups');
+      return;
+    }
+    
+    // If we're already on home page, just scroll
+    const element = document.getElementById('ctf-writeups');
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const handleHomeClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    // If we're not on the home page, navigate to home first
+    if (pathname !== '/') {
+      router.push('/');
+      return;
+    }
+    
+    // If we're already on home page, just scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6">
       <div className="flex justify-center">
@@ -20,6 +76,7 @@ export function Header() {
           <nav className="flex items-center gap-8 text-sm font-medium">
             <Link
               href="/"
+              onClick={handleHomeClick}
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
@@ -27,6 +84,7 @@ export function Header() {
             </Link>
             <Link
               href="/#ctf-writeups"
+              onClick={handleCtfWriteupsClick}
               className="text-white/80 hover:text-white transition-colors px-3 py-2 hover:bg-white/10 rounded-[20px]"
               prefetch={true}
             >
