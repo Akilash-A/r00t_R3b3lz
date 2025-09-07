@@ -222,10 +222,18 @@ export function MemberCard({ member }: { member: TeamMember }) {
                   const socialConfig = socialIcons[platform as keyof typeof socialIcons];
                   if (!socialConfig) return null;
                   
-                  const Icon = socialConfig.icon;
-                  const href = platform === 'email' ? `mailto:${url}` : url;
-                  
-                  return (
+              const Icon = socialConfig.icon;
+              
+              // Ensure URLs have proper protocol to prevent localhost redirect
+              let href: string;
+              if (platform === 'email') {
+                href = `mailto:${url}`;
+              } else {
+                // Add https:// if URL doesn't start with http:// or https://
+                href = url.startsWith('http://') || url.startsWith('https://') 
+                  ? url 
+                  : `https://${url}`;
+              }                  return (
                     <Link
                       key={platform}
                       href={href}
