@@ -40,8 +40,8 @@ export function MemberCard({ member }: { member: TeamMember }) {
     const centerX = percentX - 50;
     const centerY = percentY - 50;
 
-    const rotateX = round(-(centerX / 6));
-    const rotateY = round(centerY / 4);
+    const rotateX = round(-(centerX / 4));
+    const rotateY = round(centerY / 3);
 
     wrap.style.setProperty('--pointer-x', `${percentX}%`);
     wrap.style.setProperty('--pointer-y', `${percentY}%`);
@@ -111,7 +111,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
       ref={wrapRef}
       className="perspective-500 transform-gpu p-4 group"
       style={{
-        perspective: '800px',
+        perspective: '1000px',
         transformStyle: 'preserve-3d'
       }}
     >
@@ -161,11 +161,11 @@ export function MemberCard({ member }: { member: TeamMember }) {
 
         <Card 
           ref={cardRef}
-          className="text-center transition-all duration-300 hover:-translate-y-6 hover:scale-105 group relative border-transparent h-80 transform-gpu rounded-[25px] cursor-pointer"
+          className="text-center transition-all duration-300 hover:-translate-y-12 hover:scale-110 group relative border-transparent h-80 transform-gpu rounded-[25px] cursor-pointer"
           style={{
             transform: 'translate3d(0, 0, 0.1px) rotateX(var(--rotate-y, 0deg)) rotateY(var(--rotate-x, 0deg))',
             transition: 'transform 0.6s ease, box-shadow 0.6s ease',
-            boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 15px) - 5px) calc((var(--pointer-from-center, 0) * 30px) - 10px) 30px -8px, 0 10px 30px rgba(0, 0, 0, 0.3)',
+            boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 20px) - 8px) calc((var(--pointer-from-center, 0) * 40px) - 15px) 40px -10px, 0 15px 50px rgba(0, 0, 0, 0.4)',
             backgroundImage: `
               radial-gradient(
                 circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
