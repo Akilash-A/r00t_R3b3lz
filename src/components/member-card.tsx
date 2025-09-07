@@ -40,8 +40,8 @@ export function MemberCard({ member }: { member: TeamMember }) {
     const centerX = percentX - 50;
     const centerY = percentY - 50;
 
-    const rotateX = round(-(centerX / 8));
-    const rotateY = round(centerY / 6);
+    const rotateX = round(-(centerX / 6));
+    const rotateY = round(centerY / 4);
 
     wrap.style.setProperty('--pointer-x', `${percentX}%`);
     wrap.style.setProperty('--pointer-y', `${percentY}%`);
@@ -111,7 +111,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
       ref={wrapRef}
       className="perspective-500 transform-gpu p-4 group"
       style={{
-        perspective: '500px',
+        perspective: '800px',
         transformStyle: 'preserve-3d'
       }}
     >
@@ -119,34 +119,34 @@ export function MemberCard({ member }: { member: TeamMember }) {
       <div className="relative">
         {/* Extended border glow spread - outermost layer */}
         <div 
-          className="absolute -inset-4 opacity-0 group-hover:opacity-60 transition-all duration-500 rounded-[32px] pointer-events-none"
+          className="absolute -inset-4 opacity-0 group-hover:opacity-80 transition-all duration-500 rounded-[32px] pointer-events-none"
           style={{
             background: `
               radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
-                rgba(59,130,246,0.25) 0%, 
-                rgba(168,85,247,0.15) 30%, 
-                rgba(14,165,233,0.1) 50%, 
+                rgba(59,130,246,0.4) 0%, 
+                rgba(168,85,247,0.25) 30%, 
+                rgba(14,165,233,0.15) 50%, 
                 transparent 70%
               )
             `,
-            filter: 'blur(20px)'
+            filter: 'blur(25px)'
           }}
         />
 
         {/* Border color spread effect - middle layer */}
         <div 
-          className="absolute -inset-3 opacity-0 group-hover:opacity-80 transition-all duration-500 rounded-[30px] pointer-events-none"
+          className="absolute -inset-3 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-[30px] pointer-events-none"
           style={{
             background: `
               radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), 
-                rgba(59,130,246,0.5) 0%, 
-                rgba(168,85,247,0.3) 20%, 
-                rgba(59,130,246,0.25) 40%, 
-                rgba(14,165,233,0.15) 60%, 
+                rgba(59,130,246,0.7) 0%, 
+                rgba(168,85,247,0.5) 20%, 
+                rgba(59,130,246,0.4) 40%, 
+                rgba(14,165,233,0.25) 60%, 
                 transparent 80%
               )
             `,
-            filter: 'blur(15px)'
+            filter: 'blur(18px)'
           }}
         />
 
@@ -154,18 +154,18 @@ export function MemberCard({ member }: { member: TeamMember }) {
         <div 
           className="absolute -inset-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[28px] pointer-events-none"
           style={{
-            background: `radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(59,130,246,0.6) 0%, rgba(168,85,247,0.4) 30%, rgba(59,130,246,0.3) 60%, transparent 100%)`,
-            filter: 'blur(10px)'
+            background: `radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(59,130,246,0.8) 0%, rgba(168,85,247,0.6) 30%, rgba(59,130,246,0.4) 60%, transparent 100%)`,
+            filter: 'blur(12px)'
           }}
         />
 
         <Card 
           ref={cardRef}
-          className="text-center transition-all duration-300 hover:-translate-y-2 group relative border-transparent h-80 transform-gpu rounded-[25px] cursor-pointer"
+          className="text-center transition-all duration-300 hover:-translate-y-6 hover:scale-105 group relative border-transparent h-80 transform-gpu rounded-[25px] cursor-pointer"
           style={{
             transform: 'translate3d(0, 0, 0.1px) rotateX(var(--rotate-y, 0deg)) rotateY(var(--rotate-x, 0deg))',
-            transition: 'transform 0.6s ease',
-            boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 10px) - 3px) calc((var(--pointer-from-center, 0) * 20px) - 6px) 20px -5px',
+            transition: 'transform 0.6s ease, box-shadow 0.6s ease',
+            boxShadow: 'rgba(0, 0, 0, 0.4) calc((var(--pointer-from-center, 0) * 15px) - 5px) calc((var(--pointer-from-center, 0) * 30px) - 10px) 30px -8px, 0 10px 30px rgba(0, 0, 0, 0.3)',
             backgroundImage: `
               radial-gradient(
                 circle at var(--pointer-x, 50%) var(--pointer-y, 50%),
@@ -191,9 +191,9 @@ export function MemberCard({ member }: { member: TeamMember }) {
         >
           {/* Subtle border glow */}
           <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-80 transition-all duration-500 rounded-[25px] pointer-events-none"
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 rounded-[25px] pointer-events-none"
             style={{
-              boxShadow: 'inset 0 0 0 1px rgba(59,130,246,0.5), 0 0 20px rgba(59,130,246,0.3), 0 0 40px rgba(59,130,246,0.2), 0 0 60px rgba(168,85,247,0.15)'
+              boxShadow: 'inset 0 0 0 2px rgba(59,130,246,0.8), 0 0 30px rgba(59,130,246,0.5), 0 0 60px rgba(59,130,246,0.3), 0 0 90px rgba(168,85,247,0.25)'
             }}
           />
           
@@ -204,7 +204,7 @@ export function MemberCard({ member }: { member: TeamMember }) {
               <div className="absolute inset-2 rounded-[23px] bg-gradient-to-br from-slate-800/30 to-slate-900/50 group-hover:from-blue-900/20 group-hover:to-slate-800/40 transition-all duration-500"></div>
               
               <div className="relative z-10">
-                <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary ring-4 ring-primary/20 transition-all duration-300 group-hover:ring-blue-400/60 group-hover:border-blue-400/80 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+                <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary ring-4 ring-primary/20 transition-all duration-300 group-hover:ring-8 group-hover:ring-blue-400/80 group-hover:border-blue-400/90 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.8)] group-hover:scale-110">
                 <AvatarImage 
                   src={member.avatarUrl} 
                   alt={member.name} 
