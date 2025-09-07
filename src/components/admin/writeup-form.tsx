@@ -56,6 +56,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
   const isEditMode = !!challenge;
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
   const form = useForm<ChallengeFormData>({
     resolver: zodResolver(challengeSchema),
@@ -104,7 +105,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/temp', {
         method: 'POST',
         body: formData,
       });
@@ -112,11 +113,22 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
       const result = await response.json();
 
       if (result.success) {
-        // Update the image URL field with the uploaded image URL
-        form.setValue('imageUrl', `${window.location.origin}${result.url}`);
+        // Clean up previous temp file if exists
+        if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+          const oldTempFilename = tempImageUrl.split('/uploads/temp/')[1];
+          fetch(`/api/upload/temp/cleanup?filename=${oldTempFilename}`, {
+            method: 'DELETE'
+          }).catch(console.error);
+        }
+
+        // Update the image URL field with the temporary upload URL
+        const fullTempUrl = `${window.location.origin}${result.url}`;
+        form.setValue('imageUrl', fullTempUrl);
+        setTempImageUrl(fullTempUrl);
+        
         toast({
-          title: "Image Uploaded",
-          description: "Challenge image has been uploaded successfully.",
+          title: "Image Ready",
+          description: "Challenge image is ready. Click 'Save' to finalize.",
         });
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -133,6 +145,18 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
     }
   };
 
+  // Clean up temp file when component unmounts or form is cancelled
+  useEffect(() => {
+    return () => {
+      if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+        const tempFilename = tempImageUrl.split('/uploads/temp/')[1];
+        fetch(`/api/upload/temp/cleanup?filename=${tempFilename}`, {
+          method: 'DELETE'
+        }).catch(console.error);
+      }
+    };
+  }, [tempImageUrl]);
+
   async function onSubmit(data: ChallengeFormData) {
      startTransition(async () => {
       const result = await upsertChallenge(data, challenge?.id || null);
@@ -141,6 +165,8 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
           title: isEditMode ? "Write-up Updated" : "Write-up Added",
           description: `"${result.data.title}" has been successfully ${isEditMode ? 'updated' : 'added'}.`,
         });
+        
+        setTempImageUrl(null); // Clear temp image URL on successful save
         
         // Reset form to empty state if we just added a new writeup
         if (!isEditMode) {
@@ -289,7 +315,7 @@ export function WriteupForm({ challenge, ctfs, onFormSubmit }: WriteupFormProps)
               {isUploading && <Upload className="h-4 w-4 animate-spin text-primary" />}
             </div>
             <p className="text-sm text-muted-foreground">
-              Upload a challenge image. Supported formats: PNG, JPG, GIF (max 5MB)
+              Upload a challenge image. Supported formats: PNG, JPG, GIF (max 5MB). Image will be saved when you click 'Save Changes'.
             </p>
           </div>
           <FormField

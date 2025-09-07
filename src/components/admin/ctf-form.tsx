@@ -26,6 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { upsertCtf } from "@/lib/actions";
 import { useTransition, useState } from "react";
+import React from "react";
 import { Upload } from "lucide-react";
 
 interface CtfFormProps {
@@ -38,6 +39,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
   const isEditMode = !!ctf;
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
   const form = useForm<CtfFormData>({
     resolver: zodResolver(ctfSchema),
@@ -58,7 +60,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/temp', {
         method: 'POST',
         body: formData,
       });
@@ -66,11 +68,22 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
       const result = await response.json();
 
       if (result.success) {
-        // Update the banner URL field with the uploaded image URL
-        form.setValue('bannerUrl', `${window.location.origin}${result.url}`);
+        // Clean up previous temp file if exists
+        if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+          const oldTempFilename = tempImageUrl.split('/uploads/temp/')[1];
+          fetch(`/api/upload/temp/cleanup?filename=${oldTempFilename}`, {
+            method: 'DELETE'
+          }).catch(console.error);
+        }
+
+        // Update the banner URL field with the temporary upload URL
+        const fullTempUrl = `${window.location.origin}${result.url}`;
+        form.setValue('bannerUrl', fullTempUrl);
+        setTempImageUrl(fullTempUrl);
+        
         toast({
-          title: "Image Uploaded",
-          description: "Banner image has been uploaded successfully.",
+          title: "Image Ready",
+          description: "Banner image is ready. Click 'Save' to finalize.",
         });
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -87,6 +100,18 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
     }
   };
 
+  // Clean up temp file when component unmounts or form is cancelled
+  React.useEffect(() => {
+    return () => {
+      if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+        const tempFilename = tempImageUrl.split('/uploads/temp/')[1];
+        fetch(`/api/upload/temp/cleanup?filename=${tempFilename}`, {
+          method: 'DELETE'
+        }).catch(console.error);
+      }
+    };
+  }, [tempImageUrl]);
+
   async function onSubmit(data: CtfFormData) {
     startTransition(async () => {
       const result = await upsertCtf(data, ctf?.id || null);
@@ -95,6 +120,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
           title: isEditMode ? "CTF Event Updated" : "CTF Event Added",
           description: `"${result.data.name}" has been successfully ${isEditMode ? 'updated' : 'added'}.`,
         });
+        setTempImageUrl(null); // Clear temp image URL on successful save
         onFormSubmit(result.data);
       } else {
         toast({
@@ -189,7 +215,7 @@ export function CtfForm({ ctf, onFormSubmit }: CtfFormProps) {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              {isUploading ? "Uploading..." : "Upload an image file (max 5MB) or provide a URL above."}
+              {isUploading ? "Uploading..." : "Upload an image file (max 5MB) or provide a URL above. Image will be saved when you click 'Save Changes'."}
             </p>
           </div>
           <DialogFooter>

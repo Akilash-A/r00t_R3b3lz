@@ -30,6 +30,61 @@ async function deleteUploadedImage(imageUrl: string) {
   }
 }
 
+// Helper function to finalize temporary upload and delete old image
+async function finalizeImageUpload(tempImageUrl: string, oldImageUrl?: string): Promise<string | null> {
+  if (!tempImageUrl) return null;
+  
+  try {
+    // Check if it's a temporary upload
+    if (tempImageUrl.includes('/uploads/temp/')) {
+      const tempFilename = tempImageUrl.split('/uploads/temp/')[1];
+      const finalFilename = tempFilename.replace('temp_', '');
+      
+      // Extract old filename if exists
+      let oldFilename = null;
+      if (oldImageUrl && oldImageUrl.includes('/uploads/')) {
+        oldFilename = oldImageUrl.split('/uploads/')[1];
+      }
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload/finalize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tempFilename,
+          finalFilename,
+          deleteOldFile: oldFilename
+        })
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        return result.url;
+      }
+    }
+    
+    return tempImageUrl;
+  } catch (error) {
+    console.error('Error finalizing image upload:', error);
+    return tempImageUrl;
+  }
+}
+
+// Helper function to cleanup temporary file if form submission fails
+async function cleanupTempImage(imageUrl: string) {
+  if (!imageUrl || !imageUrl.includes('/uploads/temp/')) return;
+  
+  try {
+    const tempFilename = imageUrl.split('/uploads/temp/')[1];
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/upload/temp/cleanup?filename=${tempFilename}`, {
+      method: 'DELETE'
+    });
+  } catch (error) {
+    console.error('Error cleaning up temp image:', error);
+  }
+}
+
 type ActionResponse<T> = {
   success: boolean;
   message: string;
@@ -69,11 +124,32 @@ export async function upsertCtf(formData: unknown, id: string | null): Promise<A
   try {
     await connectToDatabase();
 
+    // Get existing CTF data if updating
+    let existingCtf = null;
+    if (id) {
+      existingCtf = await CtfModel.findById(id);
+      if (!existingCtf) {
+        return { success: false, message: "CTF not found." };
+      }
+    }
+
+    // Finalize banner image upload and handle old image deletion
+    const finalBannerUrl = await finalizeImageUpload(
+      data.bannerUrl,
+      existingCtf?.bannerUrl
+    );
+
+    // Update data with finalized banner URL
+    const finalData = {
+      ...data,
+      bannerUrl: finalBannerUrl || data.bannerUrl
+    };
+
     if (id) {
       // Update existing CTF
       const updatedCtf = await CtfModel.findByIdAndUpdate(
         id,
-        data,
+        finalData,
         { new: true, runValidators: true }
       );
       
@@ -90,7 +166,7 @@ export async function upsertCtf(formData: unknown, id: string | null): Promise<A
       };
     } else {
       // Create new CTF
-      const newCtf = new CtfModel(data);
+      const newCtf = new CtfModel(finalData);
       const savedCtf = await newCtf.save();
       
       newOrUpdatedCtf = {
@@ -109,6 +185,12 @@ export async function upsertCtf(formData: unknown, id: string | null): Promise<A
     return { success: true, message: "CTF saved successfully.", data: newOrUpdatedCtf };
   } catch (error) {
     console.error('Error saving CTF:', error);
+    
+    // Clean up temp image if form submission failed
+    if (data.bannerUrl) {
+      await cleanupTempImage(data.bannerUrl);
+    }
+    
     return { success: false, message: "An error occurred while saving the CTF." };
   }
 }
@@ -165,17 +247,32 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
   }
 
   const { data } = validatedFields;
-  
-  // Ensure avatarUrl has a default value if empty
-  const memberData = {
-    ...data,
-    avatarUrl: data.avatarUrl || '/placeholder-avatar.svg'
-  };
-  
-  let newOrUpdatedMember: TeamMember;
 
   try {
     await connectToDatabase();
+
+    // Get existing member data if updating
+    let existingMember = null;
+    if (id) {
+      existingMember = await TeamMemberModel.findById(id);
+      if (!existingMember) {
+        return { success: false, message: "Member not found." };
+      }
+    }
+
+    // Finalize avatar image upload and handle old image deletion
+    const finalAvatarUrl = await finalizeImageUpload(
+      data.avatarUrl || '',
+      existingMember?.avatarUrl
+    );
+
+    // Ensure avatarUrl has a default value if empty
+    const memberData = {
+      ...data,
+      avatarUrl: finalAvatarUrl || data.avatarUrl || '/placeholder-avatar.svg'
+    };
+    
+    let newOrUpdatedMember: TeamMember;
 
     if (id) {
       // Update existing member
@@ -233,6 +330,12 @@ export async function upsertMember(formData: unknown, id: string | null): Promis
     return { success: true, message: "Member saved successfully.", data: serializedMember };
   } catch (error) {
     console.error('Error saving member:', error);
+    
+    // Clean up temp image if form submission failed
+    if (data.avatarUrl) {
+      await cleanupTempImage(data.avatarUrl);
+    }
+    
     return { success: false, message: "An error occurred while saving the member." };
   }
 }
@@ -285,11 +388,32 @@ export async function upsertChallenge(formData: unknown, id: string | null): Pro
   try {
     await connectToDatabase();
 
+    // Get existing challenge data if updating
+    let existingChallenge = null;
+    if (id) {
+      existingChallenge = await ChallengeModel.findById(id);
+      if (!existingChallenge) {
+        return { success: false, message: "Challenge not found." };
+      }
+    }
+
+    // Finalize image upload and handle old image deletion
+    const finalImageUrl = await finalizeImageUpload(
+      data.imageUrl || '',
+      existingChallenge?.imageUrl
+    );
+
+    // Update data with finalized image URL
+    const finalData = {
+      ...data,
+      imageUrl: finalImageUrl || data.imageUrl
+    };
+
     if (id) {
       // Update existing challenge
       const updatedChallenge = await ChallengeModel.findByIdAndUpdate(
         id,
-        data,
+        finalData,
         { new: true, runValidators: true }
       );
       
@@ -308,7 +432,7 @@ export async function upsertChallenge(formData: unknown, id: string | null): Pro
       };
     } else {
       // Create new challenge
-      const newChallenge = new ChallengeModel(data);
+      const newChallenge = new ChallengeModel(finalData);
       const savedChallenge = await newChallenge.save();
       
       newOrUpdatedChallenge = {
@@ -333,6 +457,12 @@ export async function upsertChallenge(formData: unknown, id: string | null): Pro
     return { success: true, message: "Challenge saved successfully.", data: newOrUpdatedChallenge };
   } catch (error) {
     console.error('Error saving challenge:', error);
+    
+    // Clean up temp image if form submission failed
+    if (data.imageUrl) {
+      await cleanupTempImage(data.imageUrl);
+    }
+    
     return { success: false, message: "An error occurred while saving the challenge." };
   }
 }

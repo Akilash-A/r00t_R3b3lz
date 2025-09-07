@@ -37,25 +37,26 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
   const isEditMode = !!member;
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
+  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
   const form = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
     defaultValues: {
-      name: member?.name || "",
+      name: "",
       social: {
-        instagram: member?.social?.instagram || "",
-        twitter: member?.social?.twitter || "",
-        github: member?.social?.github || "",
-        linkedin: member?.social?.linkedin || "",
-        email: member?.social?.email || "",
-        website: member?.social?.website || "",
+        instagram: "",
+        twitter: "",
+        github: "",
+        linkedin: "",
+        email: "",
+        website: "",
       },
-      role: member?.role || "",
-      avatarUrl: member?.avatarUrl || "",
+      role: "",
+      avatarUrl: "",
     },
   });
 
-  // Reset form when member prop changes (for edit mode)
+  // Update form when member prop changes
   useEffect(() => {
     if (member) {
       form.reset({
@@ -107,7 +108,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/temp', {
         method: 'POST',
         body: formData,
       });
@@ -117,11 +118,27 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
       }
 
       const result = await response.json();
-      form.setValue('avatarUrl', result.url);
-      toast({
-        title: "Success",
-        description: "Avatar uploaded successfully",
-      });
+      
+      if (result.success) {
+        // Clean up previous temp file if exists
+        if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+          const oldTempFilename = tempImageUrl.split('/uploads/temp/')[1];
+          fetch(`/api/upload/temp/cleanup?filename=${oldTempFilename}`, {
+            method: 'DELETE'
+          }).catch(console.error);
+        }
+
+        const fullTempUrl = `${window.location.origin}${result.url}`;
+        form.setValue('avatarUrl', fullTempUrl);
+        setTempImageUrl(fullTempUrl);
+        
+        toast({
+          title: "Image Ready",
+          description: "Avatar is ready. Click 'Save' to finalize.",
+        });
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
     } catch (error) {
       toast({
         title: "Upload failed",
@@ -133,6 +150,18 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
     }
   };
 
+  // Clean up temp file when component unmounts or form is cancelled
+  useEffect(() => {
+    return () => {
+      if (tempImageUrl && tempImageUrl.includes('/uploads/temp/')) {
+        const tempFilename = tempImageUrl.split('/uploads/temp/')[1];
+        fetch(`/api/upload/temp/cleanup?filename=${tempFilename}`, {
+          method: 'DELETE'
+        }).catch(console.error);
+      }
+    };
+  }, [tempImageUrl]);
+
   async function onSubmit(data: MemberFormData) {
     startTransition(async () => {
       const result = await upsertMember(data, member?.id || null);
@@ -141,6 +170,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
           title: isEditMode ? "Member Updated" : "Member Added",
           description: `${result.data.name} has been successfully ${isEditMode ? 'updated' : 'added'}.`,
         });
+        setTempImageUrl(null); // Clear temp image URL on successful save
         onFormSubmit(result.data);
       } else {
         toast({
@@ -313,7 +343,7 @@ export function MemberForm({ member, onFormSubmit }: MemberFormProps) {
               disabled={isUploading}
             />
             <p className="text-sm text-muted-foreground">
-              {isUploading ? "Uploading..." : "Upload an image file to automatically fill the avatar URL above."}
+              {isUploading ? "Uploading..." : "Upload an image file to set as avatar. Avatar will be saved when you click 'Save'."}
             </p>
           </div>
           <DialogFooter>
