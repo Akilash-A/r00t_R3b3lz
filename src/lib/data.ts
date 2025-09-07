@@ -55,7 +55,7 @@ export async function getChallengesFromDB(): Promise<Challenge[]> {
 export async function getTeamMembersFromDB(): Promise<TeamMember[]> {
   try {
     await connectToDatabase();
-    const members = await TeamMemberModel.find({}).sort({ createdAt: -1 }).lean();
+    const members = await TeamMemberModel.find({}).sort({ createdAt: 1 }).lean();
     
     // Explicitly serialize to ensure no MongoDB methods remain
     return JSON.parse(JSON.stringify(members.map((member: any) => {

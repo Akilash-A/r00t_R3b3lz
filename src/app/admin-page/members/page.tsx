@@ -53,7 +53,7 @@ export default function AdminMembersPage() {
     if (selectedMember) {
       setMembers(members.map(m => m.id === newOrUpdatedMember.id ? newOrUpdatedMember : m));
     } else {
-      setMembers([newOrUpdatedMember, ...members]);
+      setMembers([...members, newOrUpdatedMember]);
     }
     setFormDialogOpen(false);
     setSelectedMember(null);
