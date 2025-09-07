@@ -23,11 +23,11 @@ export default async function MembersPage() {
         pointerEvents: 'auto'
       }}>
         <Cubes 
-          gridSize={24}
+          gridSize={25}
           cubeSize={40}
           maxAngle={38}
           radius={4}
-          cellGap={40}
+          cellGap={35}
           borderStyle="2px dashed #b19eef"
           faceColor="#070010"
           rippleColor="#ffffffff"
@@ -38,10 +38,10 @@ export default async function MembersPage() {
       </div>
       
       {/* Content */}
-      <div className="relative container mx-auto py-16 md:py-24 px-4 pt-32" style={{ zIndex: 10, pointerEvents: 'none' }}>
-        <div className="text-center mb-16 bg-black/40 backdrop-blur-sm rounded-lg p-8" style={{ pointerEvents: 'auto' }}>
+      <div className="relative container mx-auto py-16 md:py-24 px-4 pt-64" style={{ zIndex: 10, pointerEvents: 'none' }}>
+        <div className="text-center mb-16 bg-black/40 backdrop-blur-sm p-6 max-w-3xl mx-auto" style={{ pointerEvents: 'auto', borderRadius: '20px' }}>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Meet the Team</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-muted-foreground max-w-xl mx-auto">
             The minds behind the hacks. A collective of passionate security researchers and CTF enthusiasts.
           </p>
         </div>
